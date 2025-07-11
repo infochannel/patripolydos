@@ -12,7 +12,7 @@ interface Income {
   id: string;
   name: string;
   amount: number;
-  frequency: 'monthly' | 'bi-weekly' | 'weekly' | 'yearly';
+  frequency: 'monthly' | 'bi-weekly' | 'weekly' | 'yearly' | 'one-time';
 }
 
 interface IngresosActivosProps {
@@ -88,6 +88,8 @@ export const IngresosActivos = ({ onBack }: IngresosActivosProps) => {
         return income.amount * 2.17; // Average bi-weeks per month
       case 'yearly':
         return income.amount / 12;
+      case 'one-time':
+        return 0; // One-time payments don't contribute to monthly recurring income
       default:
         return income.amount;
     }
@@ -102,7 +104,8 @@ export const IngresosActivos = ({ onBack }: IngresosActivosProps) => {
       'monthly': 'Mensual',
       'bi-weekly': 'Quincenal',
       'weekly': 'Semanal',
-      'yearly': 'Anual'
+      'yearly': 'Anual',
+      'one-time': 'Pago único'
     };
     return labels[frequency as keyof typeof labels] || frequency;
   };
@@ -220,6 +223,7 @@ export const IngresosActivos = ({ onBack }: IngresosActivosProps) => {
                           <SelectItem value="bi-weekly">Quincenal</SelectItem>
                           <SelectItem value="monthly">Mensual</SelectItem>
                           <SelectItem value="yearly">Anual</SelectItem>
+                          <SelectItem value="one-time">Pago único</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
