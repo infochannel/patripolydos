@@ -20,7 +20,10 @@ interface ReferralData {
   completedPayouts: number;
   paymentInfo: {
     method: string;
-    bankAccount?: string;
+    bankName?: string;
+    bankCountry?: string;
+    iban?: string;
+    swift?: string;
     paypalEmail?: string;
     cryptoWallet?: string;
   };
@@ -636,15 +639,47 @@ export const ProgramaPromotor = ({ onBack }: ProgramaPromotorProps) => {
                   </div>
 
                   {referralData.paymentInfo.method === 'bank' && (
-                    <div>
-                      <Label htmlFor="bank-account" className="text-white">Número de cuenta</Label>
-                      <Input
-                        id="bank-account"
-                        placeholder="XXXX-XXXX-XXXX-XXXX"
-                        value={referralData.paymentInfo.bankAccount || ''}
-                        onChange={(e) => updatePaymentInfo('bankAccount', e.target.value)}
-                        className="bg-white/10 border-white/20 text-white"
-                      />
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="bank-name" className="text-white">Nombre del banco</Label>
+                        <Input
+                          id="bank-name"
+                          placeholder="ej. Banco Santander"
+                          value={referralData.paymentInfo.bankName || ''}
+                          onChange={(e) => updatePaymentInfo('bankName', e.target.value)}
+                          className="bg-white/10 border-white/20 text-white"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="bank-country" className="text-white">País del banco</Label>
+                        <Input
+                          id="bank-country"
+                          placeholder="ej. España"
+                          value={referralData.paymentInfo.bankCountry || ''}
+                          onChange={(e) => updatePaymentInfo('bankCountry', e.target.value)}
+                          className="bg-white/10 border-white/20 text-white"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="iban" className="text-white">IBAN</Label>
+                        <Input
+                          id="iban"
+                          placeholder="ES91 2100 0418 4502 0005 1332"
+                          value={referralData.paymentInfo.iban || ''}
+                          onChange={(e) => updatePaymentInfo('iban', e.target.value)}
+                          className="bg-white/10 border-white/20 text-white"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="swift" className="text-white">SWIFT</Label>
+                        <Input
+                          id="swift"
+                          placeholder="ej. BSCHESMM"
+                          value={referralData.paymentInfo.swift || ''}
+                          onChange={(e) => updatePaymentInfo('swift', e.target.value)}
+                          className="bg-white/10 border-white/20 text-white"
+                        />
+                      </div>
                     </div>
                   )}
 
