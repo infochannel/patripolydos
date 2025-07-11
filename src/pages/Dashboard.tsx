@@ -125,6 +125,8 @@ export function Dashboard() {
       navigate("/duplicador");
     } else if (moduleId === "calidad-vida") {
       navigate("/calidad-vida");
+    } else if (moduleId === "ingresos") {
+      navigate("/ingresos-activos");
     } else {
       toast({
         title: "Módulo en desarrollo",
