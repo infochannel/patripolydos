@@ -2,41 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Patripoly Design System - Gamified Personal Finance
+All colors MUST be HSL for proper theming
 */
 
 @layer base {
   :root {
+    /* Brand Colors - Converted to HSL */
+    --brand-primary: 200 75% 19%; /* #0F3850 - Primary Dark */
+    --brand-teal: 178 98% 35%; /* #01B4AB - Teal */
+    --brand-yellow: 43 100% 67%; /* #FFC857 - Yellow Accent */
+    
+    /* Core System Colors */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 200 75% 19%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 200 75% 19%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 200 75% 19%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary uses brand primary */
+    --primary: 200 75% 19%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary uses soft teal */
+    --secondary: 178 30% 95%;
+    --secondary-foreground: 200 75% 19%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted backgrounds */
+    --muted: 200 20% 97%;
+    --muted-foreground: 200 25% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent uses brand teal */
+    --accent: 178 98% 35%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Success using teal */
+    --success: 178 98% 35%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning using yellow */
+    --warning: 43 100% 67%;
+    --warning-foreground: 200 75% 19%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 200 15% 88%;
+    --input: 200 15% 88%;
+    --ring: 178 98% 35%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
+
+    /* Gradients for gamification */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--brand-primary)), hsl(var(--brand-teal)));
+    --gradient-success: linear-gradient(135deg, hsl(var(--brand-teal)), hsl(var(--brand-yellow)));
+    --gradient-wealth: linear-gradient(135deg, hsl(var(--brand-yellow)), hsl(43 100% 77%));
+    
+    /* Shadows for depth */
+    --shadow-card: 0 4px 20px -4px hsl(var(--brand-primary) / 0.1);
+    --shadow-elevated: 0 8px 30px -8px hsl(var(--brand-primary) / 0.15);
+    --shadow-glow: 0 0 30px hsl(var(--brand-teal) / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
