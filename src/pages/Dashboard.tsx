@@ -49,6 +49,7 @@ export function Dashboard() {
               case 'weekly': return income.amount * 4.33;
               case 'bi-weekly': return income.amount * 2.17;
               case 'yearly': return income.amount / 12;
+              case 'one-time': return income.amount; // Include one-time payments in total
               default: return income.amount;
             }
           })();
@@ -67,7 +68,7 @@ export function Dashboard() {
       return {
         patrimonioTotal,
         cashflow: 850,
-        ingresosActivos: 3200,
+        ingresosActivos: getIngresosActivos(),
         nivelAhorro: 15,
         progresoCalidadVida: getCalidadVidaProgress()
       };
@@ -77,7 +78,7 @@ export function Dashboard() {
     return {
       patrimonioTotal: 25000,
       cashflow: 850,
-      ingresosActivos: 3200,
+      ingresosActivos: getIngresosActivos(),
       nivelAhorro: 15,
       progresoCalidadVida: getCalidadVidaProgress()
     };
