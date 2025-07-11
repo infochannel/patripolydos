@@ -130,6 +130,8 @@ export function Dashboard() {
       navigate("/ingresos-activos");
     } else if (moduleId === "ahorros") {
       navigate("/ahorros-fondo");
+    } else if (moduleId === "gastos") {
+      navigate("/gastos");
     } else {
       toast({
         title: "Módulo en desarrollo",
