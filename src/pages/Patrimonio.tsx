@@ -47,12 +47,15 @@ const countries = [
 ];
 
 export function Patrimonio({ onBack }: PatrimonioProps) {
-  const [assets, setAssets] = useState<Asset[]>([
-    { id: '1', name: 'Casa Principal', value: 250000, category: 'real-estate', type: 'asset' },
-    { id: '2', name: 'Coche', value: 15000, category: 'vehicles', type: 'asset' },
-    { id: '3', name: 'Cuenta de Ahorros', value: 25000, category: 'savings', type: 'asset' },
-    { id: '4', name: 'Hipoteca Casa', value: 180000, category: 'mortgage', type: 'liability' },
-  ]);
+  const [assets, setAssets] = useState<Asset[]>(() => {
+    const saved = localStorage.getItem('patripoly_assets');
+    return saved ? JSON.parse(saved) : [
+      { id: '1', name: 'Casa Principal', value: 250000, category: 'real-estate', type: 'asset' },
+      { id: '2', name: 'Coche', value: 15000, category: 'vehicles', type: 'asset' },
+      { id: '3', name: 'Cuenta de Ahorros', value: 25000, category: 'savings', type: 'asset' },
+      { id: '4', name: 'Hipoteca Casa', value: 180000, category: 'mortgage', type: 'liability' },
+    ];
+  });
   
   const [selectedCountry, setSelectedCountry] = useState('ES');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -92,6 +95,10 @@ export function Patrimonio({ onBack }: PatrimonioProps) {
     setAssets([...assets, asset]);
     setNewAsset({ name: '', value: '', category: '', type: 'asset' });
     setIsDialogOpen(false);
+    
+    // Update localStorage for dashboard sync
+    const updatedAssets = [...assets, asset];
+    localStorage.setItem('patripoly_assets', JSON.stringify(updatedAssets));
     
     toast({
       title: "¡Éxito!",
@@ -137,6 +144,9 @@ export function Patrimonio({ onBack }: PatrimonioProps) {
     setEditingAsset(null);
     setIsEditDialogOpen(false);
     
+    // Update localStorage for dashboard sync
+    localStorage.setItem('patripoly_assets', JSON.stringify(updatedAssets));
+    
     toast({
       title: "¡Actualizado!",
       description: `${newAsset.type === 'asset' ? 'Activo' : 'Pasivo'} actualizado correctamente`,
@@ -147,7 +157,11 @@ export function Patrimonio({ onBack }: PatrimonioProps) {
     const asset = assets.find(a => a.id === assetId);
     if (!asset) return;
 
-    setAssets(assets.filter(a => a.id !== assetId));
+    const updatedAssets = assets.filter(a => a.id !== assetId);
+    setAssets(updatedAssets);
+    
+    // Update localStorage for dashboard sync
+    localStorage.setItem('patripoly_assets', JSON.stringify(updatedAssets));
     
     toast({
       title: "Eliminado",

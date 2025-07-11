@@ -22,20 +22,58 @@ export function Dashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Sample wealth data - in real app this would come from API
-  const wealthData = {
-    patrimonioTotal: 25000,
-    cashflow: 850,
-    ingresosActivos: 3200,
-    nivelAhorro: 15,
-    progresoCalidadVida: 35
+  // Get wealth data from localStorage or use defaults
+  const getWealthData = () => {
+    const savedAssets = localStorage.getItem('patripoly_assets');
+    if (savedAssets) {
+      const assets = JSON.parse(savedAssets);
+      const totalAssets = assets.filter((a: any) => a.type === 'asset').reduce((sum: number, asset: any) => sum + asset.value, 0);
+      const totalLiabilities = assets.filter((a: any) => a.type === 'liability').reduce((sum: number, asset: any) => sum + asset.value, 0);
+      const patrimonioTotal = totalAssets - totalLiabilities;
+      
+      return {
+        patrimonioTotal,
+        cashflow: 850,
+        ingresosActivos: 3200,
+        nivelAhorro: 15,
+        progresoCalidadVida: 35
+      };
+    }
+    
+    // Default values
+    return {
+      patrimonioTotal: 25000,
+      cashflow: 850,
+      ingresosActivos: 3200,
+      nivelAhorro: 15,
+      progresoCalidadVida: 35
+    };
   };
+
+  const [wealthData, setWealthData] = useState(getWealthData());
 
   useEffect(() => {
     const userData = localStorage.getItem('patripoly_user');
     if (userData) {
       setUser(JSON.parse(userData));
     }
+    
+    // Listen for localStorage changes to update wealth data
+    const handleStorageChange = () => {
+      setWealthData(getWealthData());
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check for changes when component mounts/updates
+    const interval = setInterval(() => {
+      setWealthData(getWealthData());
+    }, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleLogout = () => {
