@@ -90,6 +90,8 @@ export function Dashboard() {
       navigate("/cashflow");
     } else if (moduleId === "duplicador") {
       navigate("/duplicador");
+    } else if (moduleId === "calidad-vida") {
+      navigate("/calidad-vida");
     } else {
       toast({
         title: "Módulo en desarrollo",
