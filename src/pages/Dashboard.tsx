@@ -25,6 +25,19 @@ export function Dashboard() {
   // Get wealth data from localStorage or use defaults
   const getWealthData = () => {
     const savedAssets = localStorage.getItem('patripoly_assets');
+    
+    // Get Calidad de Vida progress
+    const getCalidadVidaProgress = () => {
+      const savedItems = localStorage.getItem('calidad-vida-items');
+      if (savedItems) {
+        const items = JSON.parse(savedItems);
+        const totalDesiredCost = items.reduce((sum: number, item: any) => sum + item.monthlyCost, 0);
+        const ownedCost = items.filter((item: any) => item.isOwned).reduce((sum: number, item: any) => sum + item.monthlyCost, 0);
+        return totalDesiredCost > 0 ? Math.round((ownedCost / totalDesiredCost) * 100) : 0;
+      }
+      return 35; // Default value
+    };
+    
     if (savedAssets) {
       const assets = JSON.parse(savedAssets);
       const totalAssets = assets.filter((a: any) => a.type === 'asset').reduce((sum: number, asset: any) => sum + asset.value, 0);
@@ -36,7 +49,7 @@ export function Dashboard() {
         cashflow: 850,
         ingresosActivos: 3200,
         nivelAhorro: 15,
-        progresoCalidadVida: 35
+        progresoCalidadVida: getCalidadVidaProgress()
       };
     }
     
@@ -46,7 +59,7 @@ export function Dashboard() {
       cashflow: 850,
       ingresosActivos: 3200,
       nivelAhorro: 15,
-      progresoCalidadVida: 35
+      progresoCalidadVida: getCalidadVidaProgress()
     };
   };
 
@@ -105,6 +118,8 @@ export function Dashboard() {
       navigate("/patrimonio");
     } else if (cardType === "cashflow") {
       navigate("/cashflow");
+    } else if (cardType === "calidad-vida") {
+      navigate("/calidad-vida");
     }
   };
 
