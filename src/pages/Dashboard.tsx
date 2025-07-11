@@ -37,6 +37,26 @@ export function Dashboard() {
       }
       return 35; // Default value
     };
+
+    // Get Ingresos Activos total
+    const getIngresosActivos = () => {
+      const savedIncomes = localStorage.getItem('ingresos-activos');
+      if (savedIncomes) {
+        const incomes = JSON.parse(savedIncomes);
+        return incomes.reduce((total: number, income: any) => {
+          const monthlyAmount = (() => {
+            switch (income.frequency) {
+              case 'weekly': return income.amount * 4.33;
+              case 'bi-weekly': return income.amount * 2.17;
+              case 'yearly': return income.amount / 12;
+              default: return income.amount;
+            }
+          })();
+          return total + monthlyAmount;
+        }, 0);
+      }
+      return 3200; // Default value
+    };
     
     if (savedAssets) {
       const assets = JSON.parse(savedAssets);
@@ -120,6 +140,8 @@ export function Dashboard() {
       navigate("/cashflow");
     } else if (cardType === "calidad-vida") {
       navigate("/calidad-vida");
+    } else if (cardType === "ingresos-activos") {
+      navigate("/ingresos-activos");
     }
   };
 
