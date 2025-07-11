@@ -147,6 +147,8 @@ export function Dashboard() {
       navigate("/calidad-vida");
     } else if (cardType === "ingresos-activos") {
       navigate("/ingresos-activos");
+    } else if (cardType === "ahorros") {
+      navigate("/ahorros-fondo");
     }
   };
 

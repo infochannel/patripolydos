@@ -56,14 +56,14 @@ export function WealthSummaryCards({ data, onCardClick }: WealthSummaryCardsProp
       clickable: true
     },
     {
-      id: "ahorro",
+      id: "ahorros",
       title: "Nivel de Ahorro",
       value: `${data.nivelAhorro}%`,
       icon: PiggyBank,
       trend: data.nivelAhorro > 20 ? "up" : "down",
       bgGradient: "bg-accent",
       description: "De tus ingresos",
-      clickable: false
+      clickable: true
     },
     {
       id: "calidad",
