@@ -99,6 +99,8 @@ export function Dashboard() {
   const handleCardClick = (cardType: string) => {
     if (cardType === "patrimonio") {
       navigate("/patrimonio");
+    } else if (cardType === "cashflow") {
+      navigate("/cashflow");
     }
   };
 

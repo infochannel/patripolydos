@@ -43,7 +43,7 @@ export function WealthSummaryCards({ data, onCardClick }: WealthSummaryCardsProp
       trend: data.cashflow > 0 ? "up" : "down",
       bgGradient: "bg-gradient-success",
       description: "Ingresos pasivos",
-      clickable: false
+      clickable: true
     },
     {
       id: "ingresos",
