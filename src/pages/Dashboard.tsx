@@ -48,6 +48,8 @@ export function Dashboard() {
       navigate("/centro-estudios");
     } else if (moduleId === "patrimonio") {
       navigate("/patrimonio");
+    } else if (moduleId === "cashflow") {
+      navigate("/cashflow");
     } else {
       toast({
         title: "Módulo en desarrollo",
