@@ -88,6 +88,8 @@ export function Dashboard() {
       navigate("/patrimonio");
     } else if (moduleId === "cashflow") {
       navigate("/cashflow");
+    } else if (moduleId === "duplicador") {
+      navigate("/patrimonio");
     } else {
       toast({
         title: "Módulo en desarrollo",
