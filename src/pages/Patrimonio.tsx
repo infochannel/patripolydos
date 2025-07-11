@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, TrendingUp, Building, Car, Coins, CreditCard, PiggyBank, Landmark } from "lucide-react";
+import { ArrowLeft, Plus, TrendingUp, Building, Car, Coins, CreditCard, PiggyBank, Landmark, Edit, Trash2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -56,6 +56,8 @@ export function Patrimonio({ onBack }: PatrimonioProps) {
   
   const [selectedCountry, setSelectedCountry] = useState('ES');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
   const [newAsset, setNewAsset] = useState({
     name: '',
     value: '',
@@ -94,6 +96,70 @@ export function Patrimonio({ onBack }: PatrimonioProps) {
     toast({
       title: "¡Éxito!",
       description: `${newAsset.type === 'asset' ? 'Activo' : 'Pasivo'} añadido correctamente`,
+    });
+  };
+
+  const handleEditAsset = (asset: Asset) => {
+    setEditingAsset(asset);
+    setNewAsset({
+      name: asset.name,
+      value: asset.value.toString(),
+      category: asset.category,
+      type: asset.type
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateAsset = () => {
+    if (!newAsset.name || !newAsset.value || !newAsset.category || !editingAsset) {
+      toast({
+        title: "Error",
+        description: "Por favor, completa todos los campos",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const updatedAssets = assets.map(asset =>
+      asset.id === editingAsset.id
+        ? {
+            ...asset,
+            name: newAsset.name,
+            value: parseFloat(newAsset.value),
+            category: newAsset.category,
+            type: newAsset.type
+          }
+        : asset
+    );
+
+    setAssets(updatedAssets);
+    setNewAsset({ name: '', value: '', category: '', type: 'asset' });
+    setEditingAsset(null);
+    setIsEditDialogOpen(false);
+    
+    toast({
+      title: "¡Actualizado!",
+      description: `${newAsset.type === 'asset' ? 'Activo' : 'Pasivo'} actualizado correctamente`,
+    });
+  };
+
+  const handleDeleteAsset = (assetId: string) => {
+    const asset = assets.find(a => a.id === assetId);
+    if (!asset) return;
+
+    setAssets(assets.filter(a => a.id !== assetId));
+    
+    toast({
+      title: "Eliminado",
+      description: `${asset.type === 'asset' ? 'Activo' : 'Pasivo'} "${asset.name}" eliminado correctamente`,
+    });
+  };
+
+  const handleRefreshData = () => {
+    // Simulate data refresh
+    toast({
+      title: "Datos actualizados",
+      description: "Tu información patrimonial ha sido actualizada",
     });
   };
 
@@ -190,14 +256,20 @@ export function Patrimonio({ onBack }: PatrimonioProps) {
               <TabsTrigger value="settings">Ajustes</TabsTrigger>
             </TabsList>
             
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-gradient-primary text-white hover:opacity-90">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Añadir Activo/Pasivo
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleRefreshData}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Actualizar
+              </Button>
+            
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-gradient-primary text-white hover:opacity-90">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Añadir Activo/Pasivo
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Añadir Nuevo Elemento</DialogTitle>
                   <DialogDescription>
@@ -249,7 +321,7 @@ export function Patrimonio({ onBack }: PatrimonioProps) {
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona una categoría" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-background border border-border shadow-lg z-50">
                         {(newAsset.type === 'asset' ? assetCategories : liabilityCategories).map((category) => (
                           <SelectItem key={category.id} value={category.id}>
                             {category.name}
@@ -264,8 +336,85 @@ export function Patrimonio({ onBack }: PatrimonioProps) {
                   </Button>
                 </div>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            </div>
           </div>
+
+          {/* Edit Dialog */}
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar Elemento</DialogTitle>
+                <DialogDescription>
+                  Modifica los datos de tu activo o pasivo
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Tipo</Label>
+                  <RadioGroup 
+                    value={newAsset.type} 
+                    onValueChange={(value) => setNewAsset({...newAsset, type: value as 'asset' | 'liability', category: ''})}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="asset" id="edit-asset" />
+                      <Label htmlFor="edit-asset">Activo</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="liability" id="edit-liability" />
+                      <Label htmlFor="edit-liability">Pasivo</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">Nombre</Label>
+                  <Input
+                    id="edit-name"
+                    value={newAsset.name}
+                    onChange={(e) => setNewAsset({...newAsset, name: e.target.value})}
+                    placeholder="Ej: Casa, Coche, Hipoteca..."
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit-value">Valor</Label>
+                  <Input
+                    id="edit-value"
+                    type="number"
+                    value={newAsset.value}
+                    onChange={(e) => setNewAsset({...newAsset, value: e.target.value})}
+                    placeholder="0"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Categoría</Label>
+                  <Select value={newAsset.category} onValueChange={(value) => setNewAsset({...newAsset, category: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una categoría" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border border-border shadow-lg z-50">
+                      {(newAsset.type === 'asset' ? assetCategories : liabilityCategories).map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button onClick={handleUpdateAsset} className="flex-1 bg-gradient-primary text-white">
+                    Actualizar
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="flex-1">
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <TabsContent value="summary" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -278,9 +427,29 @@ export function Patrimonio({ onBack }: PatrimonioProps) {
                 <CardContent>
                   <div className="space-y-3">
                     {assets.filter(a => a.type === 'asset').map((asset) => (
-                      <div key={asset.id} className="flex justify-between items-center p-3 border rounded-lg">
+                      <div key={asset.id} className="flex justify-between items-center p-3 border rounded-lg group">
                         <span className="font-medium">{asset.name}</span>
-                        <span className="text-emerald-600 font-semibold">{formatCurrency(asset.value)}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-emerald-600 font-semibold">{formatCurrency(asset.value)}</span>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditAsset(asset)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteAsset(asset.id)}
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -296,9 +465,29 @@ export function Patrimonio({ onBack }: PatrimonioProps) {
                 <CardContent>
                   <div className="space-y-3">
                     {assets.filter(a => a.type === 'liability').map((asset) => (
-                      <div key={asset.id} className="flex justify-between items-center p-3 border rounded-lg">
+                      <div key={asset.id} className="flex justify-between items-center p-3 border rounded-lg group">
                         <span className="font-medium">{asset.name}</span>
-                        <span className="text-red-500 font-semibold">{formatCurrency(asset.value)}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-red-500 font-semibold">{formatCurrency(asset.value)}</span>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditAsset(asset)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteAsset(asset.id)}
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
