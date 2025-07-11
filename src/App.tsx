@@ -10,6 +10,7 @@ import { Cashflow } from "./pages/Cashflow";
 import { Duplicador } from "./pages/Duplicador";
 import { CalidadVida } from "./pages/CalidadVida";
 import { IngresosActivos } from "./pages/IngresosActivos";
+import { AhorrosFondo } from "./pages/AhorrosFondo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/duplicador" element={<Duplicador onBack={() => window.history.back()} />} />
           <Route path="/calidad-vida" element={<CalidadVida onBack={() => window.history.back()} />} />
           <Route path="/ingresos-activos" element={<IngresosActivos onBack={() => window.history.back()} />} />
+          <Route path="/ahorros-fondo" element={<AhorrosFondo onBack={() => window.history.back()} />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -128,6 +128,8 @@ export function Dashboard() {
       navigate("/calidad-vida");
     } else if (moduleId === "ingresos") {
       navigate("/ingresos-activos");
+    } else if (moduleId === "ahorros") {
+      navigate("/ahorros-fondo");
     } else {
       toast({
         title: "Módulo en desarrollo",
