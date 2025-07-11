@@ -57,6 +57,9 @@ export const ProgramaPromotor = ({ onBack }: ProgramaPromotorProps) => {
   const [payoutRequests, setPayoutRequests] = useState<PayoutRequest[]>([]);
   const [payoutAmount, setPayoutAmount] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [customCode, setCustomCode] = useState('');
+  const [isEditingCode, setIsEditingCode] = useState(false);
+  const [codeAvailability, setCodeAvailability] = useState<'checking' | 'available' | 'taken' | null>(null);
 
   const { toast } = useToast();
 
@@ -102,6 +105,53 @@ export const ProgramaPromotor = ({ onBack }: ProgramaPromotorProps) => {
     toast({
       title: "¡Programa Activado!",
       description: "Tu código de referido ha sido generado. ¡Comienza a invitar amigos!"
+    });
+  };
+
+  const checkCodeAvailability = (code: string) => {
+    if (!code || code.length < 3) {
+      setCodeAvailability(null);
+      return;
+    }
+
+    setCodeAvailability('checking');
+    
+    // Simulate API call
+    setTimeout(() => {
+      const usedCodes = JSON.parse(localStorage.getItem('used-referral-codes') || '[]');
+      const isAvailable = !usedCodes.includes(code.toUpperCase()) && code.toUpperCase() !== referralData.referralCode.toUpperCase();
+      setCodeAvailability(isAvailable ? 'available' : 'taken');
+    }, 500);
+  };
+
+  const updateReferralCode = () => {
+    if (codeAvailability !== 'available' || !customCode) {
+      toast({
+        title: "Error",
+        description: "El código no está disponible",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Add old code to used codes and update with new code
+    const usedCodes = JSON.parse(localStorage.getItem('used-referral-codes') || '[]');
+    usedCodes.push(referralData.referralCode.toUpperCase());
+    localStorage.setItem('used-referral-codes', JSON.stringify(usedCodes));
+
+    const updatedData = {
+      ...referralData,
+      referralCode: customCode.toUpperCase()
+    };
+    saveData(updatedData);
+    
+    setIsEditingCode(false);
+    setCustomCode('');
+    setCodeAvailability(null);
+
+    toast({
+      title: "¡Código actualizado!",
+      description: "Tu nuevo código de referido está listo para usar"
     });
   };
 
@@ -485,6 +535,86 @@ export const ProgramaPromotor = ({ onBack }: ProgramaPromotorProps) => {
                         </>
                       )}
                     </Button>
+                  </div>
+
+                  {/* Custom Code Section */}
+                  <div className="border-t border-white/20 pt-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-white">Personalizar Código</h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditingCode(!isEditingCode)}
+                        className="bg-white/5 border-white/20 text-white hover:bg-white/10"
+                      >
+                        {isEditingCode ? 'Cancelar' : 'Editar'}
+                      </Button>
+                    </div>
+
+                    {isEditingCode ? (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="custom-code" className="text-white">Nuevo código personalizado</Label>
+                          <Input
+                            id="custom-code"
+                            placeholder="MICÓDIGO"
+                            value={customCode}
+                            onChange={(e) => {
+                              const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                              setCustomCode(value);
+                              if (value.length >= 3) {
+                                checkCodeAvailability(value);
+                              } else {
+                                setCodeAvailability(null);
+                              }
+                            }}
+                            className="bg-white/10 border-white/20 text-white"
+                            maxLength={15}
+                          />
+                          <p className="text-xs text-white/60 mt-1">
+                            Solo letras y números, 3-15 caracteres
+                          </p>
+                        </div>
+
+                        {/* Availability Status */}
+                        {codeAvailability && (
+                          <div className={`p-3 rounded-lg border ${
+                            codeAvailability === 'checking' 
+                              ? 'border-yellow-500/50 bg-yellow-500/20' 
+                              : codeAvailability === 'available'
+                                ? 'border-green-500/50 bg-green-500/20'
+                                : 'border-red-500/50 bg-red-500/20'
+                          }`}>
+                            <div className={`text-sm font-medium ${
+                              codeAvailability === 'checking' 
+                                ? 'text-yellow-200' 
+                                : codeAvailability === 'available'
+                                  ? 'text-green-200'
+                                  : 'text-red-200'
+                            }`}>
+                              {codeAvailability === 'checking' && '🔍 Verificando disponibilidad...'}
+                              {codeAvailability === 'available' && '✅ ¡Código disponible!'}
+                              {codeAvailability === 'taken' && '❌ Código no disponible'}
+                            </div>
+                          </div>
+                        )}
+
+                        <Button
+                          onClick={updateReferralCode}
+                          disabled={codeAvailability !== 'available'}
+                          className="w-full bg-white text-primary hover:bg-white/90 disabled:opacity-50"
+                        >
+                          Actualizar Código
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="bg-white/5 p-4 rounded-lg">
+                        <p className="text-white/70 text-sm">
+                          ¿Quieres un código más fácil de recordar? Puedes personalizarlo 
+                          siempre que esté disponible.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-4">
