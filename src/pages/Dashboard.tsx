@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,6 +20,7 @@ interface User {
 export function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Sample wealth data - in real app this would come from API
   const wealthData = {
@@ -42,10 +44,14 @@ export function Dashboard() {
   };
 
   const handleModuleClick = (moduleId: string) => {
-    toast({
-      title: "Módulo en desarrollo",
-      description: `El módulo ${moduleId} estará disponible pronto. ¡Sigue construyendo tu patrimonio!`,
-    });
+    if (moduleId === "estudios") {
+      navigate("/centro-estudios");
+    } else {
+      toast({
+        title: "Módulo en desarrollo",
+        description: `El módulo ${moduleId} estará disponible pronto. ¡Sigue construyendo tu patrimonio!`,
+      });
+    }
   };
 
   if (!user) return null;
