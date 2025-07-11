@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import { CentroEstudios } from "./pages/CentroEstudios";
 import { Patrimonio } from "./pages/Patrimonio";
 import { Cashflow } from "./pages/Cashflow";
+import { Duplicador } from "./pages/Duplicador";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/centro-estudios" element={<CentroEstudios onBack={() => window.history.back()} />} />
           <Route path="/patrimonio" element={<Patrimonio onBack={() => window.history.back()} />} />
           <Route path="/cashflow" element={<Cashflow onBack={() => window.history.back()} />} />
+          <Route path="/duplicador" element={<Duplicador onBack={() => window.history.back()} />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
