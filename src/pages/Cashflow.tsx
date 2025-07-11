@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, DollarSign, Zap, Home, Building, Briefcase, PiggyBank } from "lucide-react";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, DollarSign, Zap, Home, Building, Briefcase, PiggyBank, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -56,6 +56,10 @@ export function Cashflow({ onBack }: CashflowProps) {
 
   const [monthlyGoal, setMonthlyGoal] = useState(2000);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
+  const [editingSource, setEditingSource] = useState<PassiveIncomeSource | null>(null);
+  const [customGoal, setCustomGoal] = useState("");
   const [newSource, setNewSource] = useState({
     name: "",
     amount: "",
@@ -103,6 +107,57 @@ export function Cashflow({ onBack }: CashflowProps) {
     toast({
       title: "Fuente agregada",
       description: "Tu nueva fuente de ingresos pasivos ha sido registrada"
+    });
+  };
+
+  const handleEditSource = () => {
+    if (!editingSource || !editingSource.name || !editingSource.amount || !editingSource.category) {
+      toast({
+        title: "Error",
+        description: "Por favor completa todos los campos requeridos",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSources(sources.map(source => 
+      source.id === editingSource.id ? editingSource : source
+    ));
+    setEditingSource(null);
+    setIsEditDialogOpen(false);
+    
+    toast({
+      title: "Fuente actualizada",
+      description: "Los cambios han sido guardados"
+    });
+  };
+
+  const handleDeleteSource = (id: string) => {
+    setSources(sources.filter(source => source.id !== id));
+    toast({
+      title: "Fuente eliminada",
+      description: "La fuente de ingresos ha sido eliminada"
+    });
+  };
+
+  const handleCustomGoal = () => {
+    const goal = parseFloat(customGoal);
+    if (isNaN(goal) || goal <= 0) {
+      toast({
+        title: "Error",
+        description: "Por favor ingresa un monto válido",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setMonthlyGoal(goal);
+    setCustomGoal("");
+    setIsGoalDialogOpen(false);
+    
+    toast({
+      title: "Meta actualizada",
+      description: `Nueva meta: €${goal}/mes`
     });
   };
 
@@ -219,11 +274,83 @@ export function Cashflow({ onBack }: CashflowProps) {
           <TabsContent value="overview" className="space-y-6">
             {/* Quick Actions */}
             <div className="flex flex-col sm:flex-row gap-4">
+              <Dialog open={isGoalDialogOpen} onOpenChange={setIsGoalDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Target className="h-4 w-4 mr-2" />
+                    Aumentar Meta
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Actualizar Meta Mensual</DialogTitle>
+                    <DialogDescription>
+                      Define tu nueva meta de ingresos pasivos mensuales
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="customGoal">Meta mensual (€)</Label>
+                      <Input
+                        id="customGoal"
+                        type="number"
+                        value={customGoal}
+                        onChange={(e) => setCustomGoal(e.target.value)}
+                        placeholder={`Actual: ${monthlyGoal}`}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={() => { setCustomGoal((monthlyGoal + 500).toString()) }} variant="outline" className="flex-1">
+                        +€500
+                      </Button>
+                      <Button onClick={() => { setCustomGoal((monthlyGoal + 1000).toString()) }} variant="outline" className="flex-1">
+                        +€1000
+                      </Button>
+                    </div>
+                    <Button onClick={handleCustomGoal} className="w-full">
+                      Actualizar Meta
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {/* Categories Overview */}
+            {groupedSources.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {groupedSources.map((group) => {
+                  const IconComponent = group.icon;
+                  return (
+                    <Card key={group.value}>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <IconComponent className="h-4 w-4" />
+                          {group.label}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-primary">
+                          €{group.total.toFixed(0)}/mes
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {group.sources.length} fuente{group.sources.length !== 1 ? 's' : ''}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="sources" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Mis Fuentes de Ingresos</h3>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="flex-1">
+                  <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    Agregar Fuente de Ingresos
+                    Agregar Fuente
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -287,42 +414,8 @@ export function Cashflow({ onBack }: CashflowProps) {
                   </div>
                 </DialogContent>
               </Dialog>
-
-              <Button variant="outline" onClick={() => setMonthlyGoal(monthlyGoal + 500)}>
-                <Target className="h-4 w-4 mr-2" />
-                Aumentar Meta
-              </Button>
             </div>
 
-            {/* Categories Overview */}
-            {groupedSources.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {groupedSources.map((group) => {
-                  const IconComponent = group.icon;
-                  return (
-                    <Card key={group.value}>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base flex items-center gap-2">
-                          <IconComponent className="h-4 w-4" />
-                          {group.label}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold text-primary">
-                          €{group.total.toFixed(0)}/mes
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {group.sources.length} fuente{group.sources.length !== 1 ? 's' : ''}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="sources" className="space-y-4">
             {sources.length === 0 ? (
               <Card>
                 <CardContent className="pt-6 text-center">
@@ -355,14 +448,35 @@ export function Cashflow({ onBack }: CashflowProps) {
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-bold text-primary">
-                              €{monthlyAmount.toFixed(0)}/mes
+                          <div className="flex items-center gap-2">
+                            <div className="text-right">
+                              <div className="font-bold text-primary">
+                                €{monthlyAmount.toFixed(0)}/mes
+                              </div>
+                              <Badge variant="secondary" className="text-xs">
+                                €{source.amount} {source.frequency === 'monthly' ? 'mensual' : 
+                                  source.frequency === 'quarterly' ? 'trimestral' : 'anual'}
+                              </Badge>
                             </div>
-                            <Badge variant="secondary" className="text-xs">
-                              €{source.amount} {source.frequency === 'monthly' ? 'mensual' : 
-                                source.frequency === 'quarterly' ? 'trimestral' : 'anual'}
-                            </Badge>
+                            <div className="flex gap-1">
+                              <Button 
+                                size="icon" 
+                                variant="ghost" 
+                                onClick={() => {
+                                  setEditingSource(source);
+                                  setIsEditDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                size="icon" 
+                                variant="ghost" 
+                                onClick={() => handleDeleteSource(source.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -371,6 +485,72 @@ export function Cashflow({ onBack }: CashflowProps) {
                 })}
               </div>
             )}
+
+            {/* Edit Source Dialog */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Editar Fuente de Ingresos</DialogTitle>
+                  <DialogDescription>
+                    Modifica los datos de tu fuente de ingresos
+                  </DialogDescription>
+                </DialogHeader>
+                {editingSource && (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="edit-name">Nombre de la fuente</Label>
+                      <Input
+                        id="edit-name"
+                        value={editingSource.name}
+                        onChange={(e) => setEditingSource({...editingSource, name: e.target.value})}
+                        placeholder="ej. Alquiler apartamento, Dividendos..."
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-amount">Monto</Label>
+                      <Input
+                        id="edit-amount"
+                        type="number"
+                        value={editingSource.amount.toString()}
+                        onChange={(e) => setEditingSource({...editingSource, amount: parseFloat(e.target.value) || 0})}
+                        placeholder="1000"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-frequency">Frecuencia</Label>
+                      <Select value={editingSource.frequency} onValueChange={(value: any) => setEditingSource({...editingSource, frequency: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="monthly">Mensual</SelectItem>
+                          <SelectItem value="quarterly">Trimestral</SelectItem>
+                          <SelectItem value="yearly">Anual</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-category">Categoría</Label>
+                      <Select value={editingSource.category} onValueChange={(value) => setEditingSource({...editingSource, category: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category.value} value={category.value}>
+                              {category.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button onClick={handleEditSource} className="w-full">
+                      Guardar Cambios
+                    </Button>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="trends" className="space-y-6">
