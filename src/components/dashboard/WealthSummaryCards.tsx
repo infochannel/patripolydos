@@ -11,9 +11,10 @@ interface WealthData {
 
 interface WealthSummaryCardsProps {
   data: WealthData;
+  onCardClick?: (cardType: string) => void;
 }
 
-export function WealthSummaryCards({ data }: WealthSummaryCardsProps) {
+export function WealthSummaryCards({ data, onCardClick }: WealthSummaryCardsProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-ES', {
       style: 'currency',
@@ -25,44 +26,54 @@ export function WealthSummaryCards({ data }: WealthSummaryCardsProps) {
 
   const cards = [
     {
+      id: "patrimonio",
       title: "Patrimonio Total",
       value: formatCurrency(data.patrimonioTotal),
       icon: Wallet,
       trend: data.patrimonioTotal > 0 ? "up" : "down",
       bgGradient: "bg-gradient-primary",
-      description: "Valor neto total"
+      description: "Valor neto total",
+      clickable: true
     },
     {
+      id: "cashflow",
       title: "Cashflow Mensual",
       value: formatCurrency(data.cashflow),
       icon: TrendingUp,
       trend: data.cashflow > 0 ? "up" : "down",
       bgGradient: "bg-gradient-success",
-      description: "Ingresos pasivos"
+      description: "Ingresos pasivos",
+      clickable: false
     },
     {
+      id: "ingresos",
       title: "Ingresos Activos",
       value: formatCurrency(data.ingresosActivos),
       icon: DollarSign,
       trend: "up",
       bgGradient: "bg-gradient-wealth",
-      description: "Ingresos del trabajo"
+      description: "Ingresos del trabajo",
+      clickable: false
     },
     {
+      id: "ahorro",
       title: "Nivel de Ahorro",
       value: `${data.nivelAhorro}%`,
       icon: PiggyBank,
       trend: data.nivelAhorro > 20 ? "up" : "down",
       bgGradient: "bg-accent",
-      description: "De tus ingresos"
+      description: "De tus ingresos",
+      clickable: false
     },
     {
+      id: "calidad",
       title: "Calidad de Vida",
       value: `${data.progresoCalidadVida}%`,
       icon: Target,
       trend: data.progresoCalidadVida > 50 ? "up" : "down",
       bgGradient: "bg-brand-teal",
-      description: "Objetivo alcanzado"
+      description: "Objetivo alcanzado",
+      clickable: false
     }
   ];
 
@@ -75,7 +86,10 @@ export function WealthSummaryCards({ data }: WealthSummaryCardsProps) {
         return (
           <Card 
             key={index} 
-            className="relative overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300 hover:scale-[1.02] cursor-pointer group"
+            className={`relative overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300 hover:scale-[1.02] group ${
+              card.clickable ? 'cursor-pointer' : 'cursor-default'
+            }`}
+            onClick={() => card.clickable && onCardClick?.(card.id)}
           >
             <div className={`absolute inset-0 ${card.bgGradient} opacity-5 group-hover:opacity-10 transition-opacity`} />
             <CardHeader className="pb-2">

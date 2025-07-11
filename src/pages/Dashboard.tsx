@@ -96,6 +96,12 @@ export function Dashboard() {
     }
   };
 
+  const handleCardClick = (cardType: string) => {
+    if (cardType === "patrimonio") {
+      navigate("/patrimonio");
+    }
+  };
+
   if (!user) return null;
 
   const userInitials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -162,7 +168,7 @@ export function Dashboard() {
         {/* Wealth Summary Cards */}
         <div className="space-y-4">
           <h3 className="text-2xl font-bold text-primary">Resumen Financiero</h3>
-          <WealthSummaryCards data={wealthData} />
+          <WealthSummaryCards data={wealthData} onCardClick={handleCardClick} />
         </div>
 
         {/* Modules */}
