@@ -132,6 +132,8 @@ export function Dashboard() {
       navigate("/ahorros-fondo");
     } else if (moduleId === "gastos") {
       navigate("/gastos");
+    } else if (moduleId === "promotor") {
+      navigate("/programa-promotor");
     } else {
       toast({
         title: "Módulo en desarrollo",
