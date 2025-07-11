@@ -46,14 +46,14 @@ export function WealthSummaryCards({ data, onCardClick }: WealthSummaryCardsProp
       clickable: true
     },
     {
-      id: "ingresos",
+      id: "ingresos-activos",
       title: "Ingresos Activos",
       value: formatCurrency(data.ingresosActivos),
       icon: DollarSign,
       trend: "up",
       bgGradient: "bg-gradient-wealth",
       description: "Ingresos del trabajo",
-      clickable: false
+      clickable: true
     },
     {
       id: "ahorro",
