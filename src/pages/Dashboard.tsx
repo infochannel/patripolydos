@@ -46,6 +46,8 @@ export function Dashboard() {
   const handleModuleClick = (moduleId: string) => {
     if (moduleId === "estudios") {
       navigate("/centro-estudios");
+    } else if (moduleId === "patrimonio") {
+      navigate("/patrimonio");
     } else {
       toast({
         title: "Módulo en desarrollo",
