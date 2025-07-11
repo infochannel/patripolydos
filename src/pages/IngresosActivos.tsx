@@ -89,7 +89,7 @@ export const IngresosActivos = ({ onBack }: IngresosActivosProps) => {
       case 'yearly':
         return income.amount / 12;
       case 'one-time':
-        return 0; // One-time payments don't contribute to monthly recurring income
+        return income.amount; // Include one-time payments in total
       default:
         return income.amount;
     }
