@@ -7,8 +7,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, User, Lock, Globe, DollarSign, Crown, Gift, Camera } from "lucide-react";
+import { ArrowLeft, User, Lock, Globe, DollarSign, Crown, Gift, Camera, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getCurrentWealthLevel, getWealthProgress, getNextWealthLevel } from "@/lib/wealth-levels";
 
 interface ProfileData {
   name: string;
@@ -77,6 +78,8 @@ export function Profile({ onBack }: ProfileProps) {
     confirmPassword: '',
   });
 
+  const [wealthData, setWealthData] = useState({ patrimonioTotal: 0 });
+
   const { toast } = useToast();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -99,6 +102,18 @@ export function Profile({ onBack }: ProfileProps) {
         plan: settings.plan || 'Free',
         isPromoterActive: settings.isPromoterActive || false,
       });
+    }
+
+    // Load wealth data
+    const savedAssets = localStorage.getItem('patripoly_assets');
+    if (savedAssets) {
+      const assets = JSON.parse(savedAssets);
+      const totalAssets = assets.filter((a: any) => a.type === 'asset').reduce((sum: number, asset: any) => sum + asset.value, 0);
+      const totalLiabilities = assets.filter((a: any) => a.type === 'liability').reduce((sum: number, asset: any) => sum + asset.value, 0);
+      const patrimonioTotal = totalAssets - totalLiabilities;
+      setWealthData({ patrimonioTotal });
+    } else {
+      setWealthData({ patrimonioTotal: 25000 });
     }
   }, []);
 
@@ -196,6 +211,19 @@ export function Profile({ onBack }: ProfileProps) {
   };
 
   const userInitials = profileData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+  
+  const currentLevel = getCurrentWealthLevel(wealthData.patrimonioTotal);
+  const nextLevel = getNextWealthLevel(wealthData.patrimonioTotal);
+  const progress = getWealthProgress(wealthData.patrimonioTotal);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -376,6 +404,56 @@ export function Profile({ onBack }: ProfileProps) {
 
             <Button onClick={handleSaveProfile}>
               Guardar preferencias
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Wealth Level Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Estado del Patrimonio
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-medium">Nivel Actual</span>
+              <Badge variant="default">
+                Nivel {currentLevel.level}: {currentLevel.name}
+              </Badge>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Patrimonio actual: {formatCurrency(wealthData.patrimonioTotal)}</span>
+                {nextLevel && (
+                  <span>Siguiente: {formatCurrency(nextLevel.minWealth)}</span>
+                )}
+              </div>
+              <div className="bg-muted rounded-full h-2">
+                <div 
+                  className="bg-gradient-primary h-2 rounded-full transition-all duration-300" 
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {progress}% completado hacia el siguiente nivel
+              </p>
+            </div>
+
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground italic">
+                "{currentLevel.description}"
+              </p>
+            </div>
+
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => navigate('/wealth-levels')}
+            >
+              Ver Todos los Niveles
             </Button>
           </CardContent>
         </Card>

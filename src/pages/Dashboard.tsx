@@ -235,8 +235,7 @@ export function Dashboard() {
             </Button>
           </div>
           <PatrimonioLevelBar 
-            level={user.patrimonioLevel} 
-            progress={patrimonioProgress} 
+            wealth={wealthData.patrimonioTotal} 
           />
         </div>
 
