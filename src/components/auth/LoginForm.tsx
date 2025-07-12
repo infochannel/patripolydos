@@ -6,41 +6,60 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import patripolyLogo from "@/assets/patripoly-logo.png";
+import axios from "@/lib/axios";
+import { Link, useNavigate } from 'react-router-dom';
 
 interface LoginFormProps {
   onToggleMode: () => void;
 }
 
+
 export function LoginForm({ onToggleMode }: LoginFormProps) {
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    // setIsLoading(true);
 
-    // Simulate authentication
-    setTimeout(() => {
-      if (email && password) {
-        localStorage.setItem('patripoly_user', JSON.stringify({ 
-          email, 
-          name: email.split('@')[0],
-          patrimonioLevel: 'Beginner',
-          joinedAt: new Date().toISOString()
-        }));
-        window.location.reload();
+    try {
+      const response = await axios.post('/api/auth/login', {
+        email: email,
+        password: password,
+        remember:false,
+      });
+      // Suponiendo que el token viene en response.data.token
+      if (response.data && response.data.accessToken) {
+        localStorage.setItem('patripoly_user', JSON.stringify(response.data.usuario));
+        localStorage.setItem('token', `${response.data.accessToken}`);
+        localStorage.setItem('isAuthenticated', 'true');
+        
+        toast({
+          title:'login_successful',
+          description: 'Redirigiendo al panel de control' ,
+        });
+        // Redirige inmediatamente a la raíz
+        // navigate('/', { replace: true });
+        location.reload();
       } else {
         toast({
-          title: "Error",
-          description: "Please fill in all fields",
-          variant: "destructive",
+          title: 'Error de inicio de sesión',
+          description: 'Credenciales inválidas' ,
+          variant: 'destructive',
         });
       }
-      setIsLoading(false);
-    }, 1000);
+    } catch (error) {
+      toast({
+        title:'Error de inicio de sesión',
+        description: error?.response?.data?.message || 'Error al conectar con el servidor',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (

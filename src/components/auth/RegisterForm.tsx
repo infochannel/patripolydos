@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import patripolyLogo from "@/assets/patripoly-logo.png";
+import axios from '@/lib/axios';
 
 interface RegisterFormProps {
   onToggleMode: () => void;
@@ -40,29 +41,71 @@ export function RegisterForm({ onToggleMode }: RegisterFormProps) {
       return;
     }
 
-    // Simulate registration
-    setTimeout(() => {
-      if (formData.name && formData.email && formData.password) {
-        localStorage.setItem('patripoly_user', JSON.stringify({ 
-          email: formData.email, 
-          name: formData.name,
-          patrimonioLevel: 'Nuevo Inversor',
-          joinedAt: new Date().toISOString()
-        }));
+    // // Simulate registration
+    // setTimeout(() => {
+    //   if (formData.name && formData.email && formData.password) {
+    //     localStorage.setItem('patripoly_user', JSON.stringify({ 
+    //       email: formData.email, 
+    //       name: formData.name,
+    //       patrimonioLevel: 'Nuevo Inversor',
+    //       joinedAt: new Date().toISOString()
+    //     }));
+    //     toast({
+    //       title: "¡Cuenta creada!",
+    //       description: "Bienvenido a Patripoly. ¡Comienza tu viaje hacia la libertad financiera!",
+    //     });
+    //     window.location.reload();
+    //   } else {
+    //     toast({
+    //       title: "Error",
+    //       description: "Por favor completa todos los campos",
+    //       variant: "destructive",
+    //     });
+    //   }
+    //   setIsLoading(false);
+    // }, 1000);
+
+     try {
+      
+      const response = await axios.post('/api/auth/register', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        c_password: formData.confirmPassword,
+      });
+
+      if (response.data && response.data.accessToken) {
+        localStorage.setItem('patripoly_user', JSON.stringify(response.data.usuario));
+        localStorage.setItem('token', `${response.data.accessToken}`);
+        localStorage.setItem('isAuthenticated', 'true');
+        
         toast({
           title: "¡Cuenta creada!",
           description: "Bienvenido a Patripoly. ¡Comienza tu viaje hacia la libertad financiera!",
         });
-        window.location.reload();
+
+        location.reload();
+
       } else {
-        toast({
+
+         toast({
           title: "Error",
           description: "Por favor completa todos los campos",
           variant: "destructive",
         });
+      
       }
-      setIsLoading(false);
-    }, 1000);
+
+    } catch (error) {
+      toast({
+        title: 'Error de registro',
+        description: error?.response?.data?.message || 'Error al conectar con el servidor',
+        variant: 'destructive',
+      });
+    }
+
+    setIsLoading(false);
+
   };
 
   return (

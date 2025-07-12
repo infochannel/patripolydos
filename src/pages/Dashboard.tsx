@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LogOut, Settings, User } from "lucide-react";
 import patripolyLogo from "@/assets/patripoly-logo.png";
 import { getCurrentWealthLevel } from "@/lib/wealth-levels";
-
+import axios from "@/lib/axios";
 interface User {
   email: string;
   name: string;
@@ -136,9 +136,59 @@ export function Dashboard() {
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('patripoly_user');
-    window.location.reload();
+
+  const handleLogout = async () => {
+    try {
+     const response =  await axios.get('/api/auth/logout');
+
+     if(response.data.message == "Unauthenticated") {
+      // Si la sesión ya está cerrada, simplemente redirigir
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('token');
+      localStorage.removeItem('patripoly_user');
+
+      // navigate('/login');
+      location.reload();
+      return;
+     }
+
+     if(response.data.result ) {
+      
+      toast({
+        title:'Logout successful',
+        description: 'You have been logged out successfully.',
+        variant: 'default',
+      });
+
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('token');
+      localStorage.removeItem('patripoly_user');
+
+      // navigate('/login');
+      location.reload();
+
+    }else{
+      toast({
+        title: 'Logout failed',
+        description: 'There was an issue logging you out. Please try again.',
+        variant: 'destructive',
+      });
+
+     }
+
+
+    } catch (e) {
+      // Ignorar error de logout, continuar limpiando sesión
+      console.log('Error during logout:', e);
+       localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('token');
+      localStorage.removeItem('patripoly_user');
+
+      // navigate('/login');
+      location.reload();
+      
+    }
+   
   };
 
   const handleModuleClick = (moduleId: string) => {

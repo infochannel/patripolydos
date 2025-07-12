@@ -17,6 +17,8 @@ import { Profile } from "./pages/Profile";
 import { Paywall } from "./pages/Paywall";
 import { WealthLevels } from "./pages/WealthLevels";
 import NotFound from "./pages/NotFound";
+import PrivateRoute from "@/components/common/PrivateRoute";
+import { LoginForm } from "./components/auth/LoginForm";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,7 @@ const App = () => (
           <Route path="/programa-promotor" element={<ProgramaPromotor onBack={() => window.history.back()} />} />
           <Route path="/profile" element={<Profile onBack={() => window.history.back()} />} />
           <Route path="/paywall" element={<Paywall />} />
+          <Route path="/login" element={<LoginForm onToggleMode={() => {}} />} />
           <Route path="/wealth-levels" element={<WealthLevels />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
