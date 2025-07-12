@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, PiggyBank, Target, Trophy, TrendingUp, Coins } from "lucide-react";
+import { ArrowLeft, Plus, PiggyBank, Target, Trophy, TrendingUp, Coins, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ interface SavingEntry {
   id: string;
   name: string;
   amount: number;
+  type: 'saving' | 'withdrawal';
   createdAt: string;
 }
 
@@ -61,7 +62,12 @@ const SAVINGS_LEVELS = [
 export const AhorrosFondo = ({ onBack }: AhorrosFondoProps) => {
   const [savings, setSavings] = useState<SavingEntry[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isWithdrawalDialogOpen, setIsWithdrawalDialogOpen] = useState(false);
   const [newSaving, setNewSaving] = useState({
+    name: "",
+    amount: 0
+  });
+  const [newWithdrawal, setNewWithdrawal] = useState({
     name: "",
     amount: 0
   });
@@ -93,6 +99,7 @@ export const AhorrosFondo = ({ onBack }: AhorrosFondoProps) => {
       id: Date.now().toString(),
       name: newSaving.name,
       amount: newSaving.amount,
+      type: 'saving',
       createdAt: new Date().toISOString()
     };
 
@@ -105,6 +112,46 @@ export const AhorrosFondo = ({ onBack }: AhorrosFondoProps) => {
     toast({
       title: "¡Excelente!",
       description: "Ahorro agregado correctamente. ¡Sigue así!"
+    });
+  };
+
+  const addWithdrawal = () => {
+    if (!newWithdrawal.name || newWithdrawal.amount <= 0) {
+      toast({
+        title: "Error",
+        description: "Por favor completa todos los campos correctamente",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const totalSavings = getTotalSavings();
+    if (newWithdrawal.amount > totalSavings) {
+      toast({
+        title: "Error",
+        description: "No puedes retirar más de lo que tienes ahorrado",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const withdrawal: SavingEntry = {
+      id: Date.now().toString(),
+      name: newWithdrawal.name,
+      amount: -newWithdrawal.amount, // Negative amount for withdrawal
+      type: 'withdrawal',
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedSavings = [...savings, withdrawal];
+    saveSavings(updatedSavings);
+
+    setNewWithdrawal({ name: "", amount: 0 });
+    setIsWithdrawalDialogOpen(false);
+    
+    toast({
+      title: "Retiro registrado",
+      description: "El retiro ha sido procesado correctamente"
     });
   };
 
@@ -214,47 +261,94 @@ export const AhorrosFondo = ({ onBack }: AhorrosFondoProps) => {
                   </div>
                 </div>
 
-                {/* Add New Saving */}
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="w-full bg-white text-primary hover:bg-white/90">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Agregar Ahorro
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-white">
-                    <DialogHeader>
-                      <DialogTitle>Nuevo Ahorro</DialogTitle>
-                      <DialogDescription>
-                        Registra un nuevo aporte a tu fondo de emergencia
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="saving-name">Concepto del ahorro</Label>
-                        <Input
-                          id="saving-name"
-                          placeholder="ej. Ahorro mensual, Bonificación, etc."
-                          value={newSaving.name}
-                          onChange={(e) => setNewSaving({ ...newSaving, name: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="saving-amount">Cantidad</Label>
-                        <Input
-                          id="saving-amount"
-                          type="number"
-                          placeholder="0"
-                          value={newSaving.amount || ""}
-                          onChange={(e) => setNewSaving({ ...newSaving, amount: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <Button onClick={addSaving} className="w-full">
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-white text-primary hover:bg-white/90">
+                        <Plus className="h-4 w-4 mr-2" />
                         Agregar Ahorro
                       </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                    </DialogTrigger>
+                    <DialogContent className="bg-white">
+                      <DialogHeader>
+                        <DialogTitle>Nuevo Ahorro</DialogTitle>
+                        <DialogDescription>
+                          Registra un nuevo aporte a tu fondo de emergencia
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="saving-name">Concepto del ahorro</Label>
+                          <Input
+                            id="saving-name"
+                            placeholder="ej. Ahorro mensual, Bonificación, etc."
+                            value={newSaving.name}
+                            onChange={(e) => setNewSaving({ ...newSaving, name: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="saving-amount">Cantidad</Label>
+                          <Input
+                            id="saving-amount"
+                            type="number"
+                            placeholder="0"
+                            value={newSaving.amount || ""}
+                            onChange={(e) => setNewSaving({ ...newSaving, amount: parseFloat(e.target.value) || 0 })}
+                          />
+                        </div>
+                        <Button onClick={addSaving} className="w-full">
+                          Agregar Ahorro
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog open={isWithdrawalDialogOpen} onOpenChange={setIsWithdrawalDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                        <Minus className="h-4 w-4 mr-2" />
+                        Retirar Fondos
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-white">
+                      <DialogHeader>
+                        <DialogTitle>Retirar Fondos</DialogTitle>
+                        <DialogDescription>
+                          Registra un retiro de tu fondo de emergencia. Solo retira en caso de verdadera emergencia.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="withdrawal-name">Motivo del retiro</Label>
+                          <Input
+                            id="withdrawal-name"
+                            placeholder="ej. Reparación de auto, Gastos médicos, etc."
+                            value={newWithdrawal.name}
+                            onChange={(e) => setNewWithdrawal({ ...newWithdrawal, name: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="withdrawal-amount">Cantidad a retirar</Label>
+                          <Input
+                            id="withdrawal-amount"
+                            type="number"
+                            placeholder="0"
+                            max={getTotalSavings()}
+                            value={newWithdrawal.amount || ""}
+                            onChange={(e) => setNewWithdrawal({ ...newWithdrawal, amount: parseFloat(e.target.value) || 0 })}
+                          />
+                          <p className="text-sm text-gray-600 mt-1">
+                            Disponible: ${getTotalSavings().toLocaleString('es-MX')}
+                          </p>
+                        </div>
+                        <Button onClick={addWithdrawal} className="w-full" variant="destructive">
+                          Confirmar Retiro
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardContent>
             </Card>
 
@@ -263,30 +357,54 @@ export const AhorrosFondo = ({ onBack }: AhorrosFondoProps) => {
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Coins className="h-5 w-5" />
-                  Historial de Ahorros
+                  Historial de Movimientos
                 </CardTitle>
                 <CardDescription className="text-white/70">
-                  Todos tus aportes al fondo de emergencia
+                  Ahorros y retiros de tu fondo de emergencia
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {savings.length === 0 ? (
                   <div className="text-center py-8 text-white/70">
-                    No has registrado ahorros aún
+                    No has registrado movimientos aún
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {savings.map((saving) => (
-                      <div key={saving.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-                        <div>
-                          <h3 className="font-medium text-white">{saving.name}</h3>
-                          <p className="text-sm text-white/70">
-                            {new Date(saving.createdAt).toLocaleDateString('es-ES')}
-                          </p>
+                    {savings
+                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                      .map((saving) => (
+                      <div key={saving.id} className={`flex items-center justify-between p-4 rounded-lg border ${
+                        saving.amount >= 0 
+                          ? 'bg-green-500/10 border-green-500/20' 
+                          : 'bg-red-500/10 border-red-500/20'
+                      }`}>
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-full ${
+                            saving.amount >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'
+                          }`}>
+                            {saving.amount >= 0 ? (
+                              <Plus className="h-4 w-4 text-green-300" />
+                            ) : (
+                              <Minus className="h-4 w-4 text-red-300" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-white">{saving.name}</h3>
+                            <p className="text-sm text-white/70">
+                              {new Date(saving.createdAt).toLocaleDateString('es-ES')}
+                            </p>
+                            <Badge variant="secondary" className={`text-xs ${
+                              saving.amount >= 0 ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'
+                            }`}>
+                              {saving.amount >= 0 ? 'Ahorro' : 'Retiro'}
+                            </Badge>
+                          </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="text-lg font-semibold text-white">
-                            ${saving.amount.toLocaleString('es-MX')}
+                          <div className={`text-lg font-semibold ${
+                            saving.amount >= 0 ? 'text-green-300' : 'text-red-300'
+                          }`}>
+                            {saving.amount >= 0 ? '+' : ''}${Math.abs(saving.amount).toLocaleString('es-MX')}
                           </div>
                           <Button
                             variant="destructive"
