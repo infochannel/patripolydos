@@ -373,15 +373,6 @@ export function Profile({ onBack }: ProfileProps) {
                       Después necesitarás el Plan Premium: <span className="font-medium">€4/mes</span>
                     </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Con Premium obtendrás:
-                  </p>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• Análisis avanzados</li>
-                    <li>• Reportes detallados</li>
-                    <li>• Soporte prioritario</li>
-                    <li>• Herramientas exclusivas</li>
-                  </ul>
                   <Button variant="outline" className="w-full">
                     Actualizar a Premium
                   </Button>
