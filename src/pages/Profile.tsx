@@ -373,7 +373,11 @@ export function Profile({ onBack }: ProfileProps) {
                       Después necesitarás el Plan Premium: <span className="font-medium">€4/mes</span>
                     </p>
                   </div>
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => navigate('/paywall')}
+                  >
                     Actualizar a Premium
                   </Button>
                 </div>
