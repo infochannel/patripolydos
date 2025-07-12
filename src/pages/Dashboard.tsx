@@ -59,6 +59,23 @@ export function Dashboard() {
       }
       return 3200; // Default value
     };
+
+    // Get total monthly expenses
+    const getGastos = () => {
+      const savedExpenses = localStorage.getItem('gastos_expenses');
+      if (savedExpenses) {
+        const expenses = JSON.parse(savedExpenses);
+        const currentMonth = new Date().getMonth() + 1;
+        const currentYear = new Date().getFullYear();
+        return expenses
+          .filter((expense: any) => {
+            const expenseDate = new Date(expense.date);
+            return expenseDate.getMonth() + 1 === currentMonth && expenseDate.getFullYear() === currentYear;
+          })
+          .reduce((total: number, expense: any) => total + expense.amount, 0);
+      }
+      return 1850; // Default value
+    };
     
     if (savedAssets) {
       const assets = JSON.parse(savedAssets);
@@ -71,7 +88,8 @@ export function Dashboard() {
         cashflow: 850,
         ingresosActivos: getIngresosActivos(),
         nivelAhorro: 15,
-        progresoCalidadVida: getCalidadVidaProgress()
+        progresoCalidadVida: getCalidadVidaProgress(),
+        gastos: getGastos()
       };
     }
     
@@ -81,7 +99,8 @@ export function Dashboard() {
       cashflow: 850,
       ingresosActivos: getIngresosActivos(),
       nivelAhorro: 15,
-      progresoCalidadVida: getCalidadVidaProgress()
+      progresoCalidadVida: getCalidadVidaProgress(),
+      gastos: getGastos()
     };
   };
 
@@ -162,6 +181,8 @@ export function Dashboard() {
       navigate("/ingresos-activos");
     } else if (cardType === "ahorros") {
       navigate("/ahorros-fondo");
+    } else if (cardType === "gastos") {
+      navigate("/gastos");
     }
   };
 

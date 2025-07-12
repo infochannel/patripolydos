@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, DollarSign, Wallet, Target, PiggyBank } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Wallet, Target, PiggyBank, CreditCard } from "lucide-react";
 
 interface WealthData {
   patrimonioTotal: number;
@@ -7,6 +7,7 @@ interface WealthData {
   ingresosActivos: number;
   nivelAhorro: number;
   progresoCalidadVida: number;
+  gastos: number;
 }
 
 interface WealthSummaryCardsProps {
@@ -63,6 +64,16 @@ export function WealthSummaryCards({ data, onCardClick }: WealthSummaryCardsProp
       trend: data.nivelAhorro > 20 ? "up" : "down",
       bgGradient: "bg-accent",
       description: "De tus ingresos",
+      clickable: true
+    },
+    {
+      id: "gastos",
+      title: "Gastos Mensuales",
+      value: formatCurrency(data.gastos),
+      icon: CreditCard,
+      trend: "down",
+      bgGradient: "bg-destructive",
+      description: "Gastos del mes",
       clickable: true
     },
     {
