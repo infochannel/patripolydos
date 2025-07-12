@@ -2,29 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import fs  from 'node:fs'
-import https from 'node:https'
-
-const options = {
-  key: fs.readFileSync('/home/megajdcc/jdcc/certificados/patripoly.key'),
-  cert: fs.readFileSync('/home/megajdcc/jdcc/certificados/patripoly.crt')
-}
-
-const host = "patripoly.dev";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   
   server: {
-    host : host,
-    port : 5173,
-    https: https
-      .createServer(options, (req, res) => {
-        res.writeHead(200);
-        res.end("hello world\n");
-      })
-      .listen(8004),
-    open: true,
+    port: 8080,
   },
 
   plugins: [
