@@ -9,6 +9,7 @@ import { ModuleButtons } from "@/components/dashboard/ModuleButtons";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut, Settings, User } from "lucide-react";
 import patripolyLogo from "@/assets/patripoly-logo.png";
+import { getCurrentWealthLevel } from "@/lib/wealth-levels";
 
 interface User {
   email: string;
@@ -167,6 +168,7 @@ export function Dashboard() {
   if (!user) return null;
 
   const userInitials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const currentWealthLevel = getCurrentWealthLevel(wealthData.patrimonioTotal);
   const patrimonioProgress = Math.min(Math.max((wealthData.patrimonioTotal / 100000) * 100, 5), 100);
 
   return (
@@ -192,7 +194,7 @@ export function Dashboard() {
                 </Avatar>
                 <div className="hidden sm:block">
                   <p className="font-medium text-primary">{user.name}</p>
-                  <p className="text-sm text-muted-foreground">{user.patrimonioLevel}</p>
+                  <p className="text-sm text-muted-foreground">Nivel {currentWealthLevel.level}: {currentWealthLevel.name}</p>
                 </div>
               </div>
               <div className="flex gap-2">
