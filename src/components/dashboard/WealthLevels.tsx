@@ -58,7 +58,7 @@ const WEALTH_LEVELS = [
   },
   {
     level: 6,
-    name: "Ejecutivo",
+    name: "Impulsor",
     range: "100,000 – 499,999",
     minWealth: 100000,
     maxWealth: 499999,
