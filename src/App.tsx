@@ -15,6 +15,7 @@ import { Gastos } from "./pages/Gastos";
 import { ProgramaPromotor } from "./pages/ProgramaPromotor";
 import { Profile } from "./pages/Profile";
 import { Paywall } from "./pages/Paywall";
+import { WealthLevels } from "./pages/WealthLevels";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/programa-promotor" element={<ProgramaPromotor onBack={() => window.history.back()} />} />
           <Route path="/profile" element={<Profile onBack={() => window.history.back()} />} />
           <Route path="/paywall" element={<Paywall />} />
+          <Route path="/wealth-levels" element={<WealthLevels />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

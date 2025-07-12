@@ -222,10 +222,23 @@ export function Dashboard() {
         </div>
 
         {/* Patrimonio Level */}
-        <PatrimonioLevelBar 
-          level={user.patrimonioLevel} 
-          progress={patrimonioProgress} 
-        />
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold text-primary">Tu Nivel de Patrimonio</h3>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate('/wealth-levels')}
+              className="text-xs"
+            >
+              Ver Todos los Niveles
+            </Button>
+          </div>
+          <PatrimonioLevelBar 
+            level={user.patrimonioLevel} 
+            progress={patrimonioProgress} 
+          />
+        </div>
 
         {/* Wealth Summary Cards */}
         <div className="space-y-4">
