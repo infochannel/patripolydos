@@ -13,6 +13,7 @@ import { IngresosActivos } from "./pages/IngresosActivos";
 import { AhorrosFondo } from "./pages/AhorrosFondo";
 import { Gastos } from "./pages/Gastos";
 import { ProgramaPromotor } from "./pages/ProgramaPromotor";
+import { Profile } from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/ahorros-fondo" element={<AhorrosFondo onBack={() => window.history.back()} />} />
           <Route path="/gastos" element={<Gastos onBack={() => window.history.back()} />} />
           <Route path="/programa-promotor" element={<ProgramaPromotor onBack={() => window.history.back()} />} />
+          <Route path="/profile" element={<Profile onBack={() => window.history.back()} />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

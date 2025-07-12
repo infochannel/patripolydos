@@ -188,7 +188,7 @@ export function Dashboard() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
                   <Settings className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
