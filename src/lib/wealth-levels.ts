@@ -12,7 +12,7 @@ export const WEALTH_LEVELS: WealthLevel[] = [
   { level: 3, name: "Visionario", minWealth: 1000, maxWealth: 4999, description: "You've begun to think like an investor. Vision brings momentum." },
   { level: 4, name: "Arquitecto", minWealth: 5000, maxWealth: 19999, description: "You're designing the future with every move. Growth is now intentional." },
   { level: 5, name: "Estratega", minWealth: 20000, maxWealth: 99999, description: "Strategy is your ally. You've crossed into serious builder territory." },
-  { level: 6, name: "Ejecutivo", minWealth: 100000, maxWealth: 499999, description: "You manage capital with confidence. The game is getting interesting." },
+  { level: 6, name: "Impulsor", minWealth: 100000, maxWealth: 499999, description: "You manage capital with confidence. The game is getting interesting." },
   { level: 7, name: "Magnate", minWealth: 500000, maxWealth: 999999, description: "Halfway to the million. You're already someone others admire." },
   { level: 8, name: "Millonario", minWealth: 1000000, maxWealth: 1999999, description: "You did it! Welcome to the Millionaire's Club. Keep your focus and expand wisely." },
   { level: 9, name: "Multi-Millonario", minWealth: 2000000, maxWealth: 9999999, description: "Your wealth multiplies. You've mastered the art of growth." },
