@@ -62,15 +62,13 @@ export function Dashboard() {
 
     // Get total monthly expenses
     const getGastos = () => {
-      const savedExpenses = localStorage.getItem('gastos_expenses');
+      const savedExpenses = localStorage.getItem('gastos-expenses');
       if (savedExpenses) {
         const expenses = JSON.parse(savedExpenses);
-        const currentMonth = new Date().getMonth() + 1;
-        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().toISOString().slice(0, 7);
         return expenses
           .filter((expense: any) => {
-            const expenseDate = new Date(expense.date);
-            return expenseDate.getMonth() + 1 === currentMonth && expenseDate.getFullYear() === currentYear;
+            return expense.date.startsWith(currentMonth);
           })
           .reduce((total: number, expense: any) => total + expense.amount, 0);
       }
