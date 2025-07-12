@@ -306,7 +306,7 @@ export const AhorrosFondo = ({ onBack }: AhorrosFondoProps) => {
 
                   <Dialog open={isWithdrawalDialogOpen} onOpenChange={setIsWithdrawalDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="border-white/20 text-primary bg-white/90 hover:bg-white hover:text-primary">
+                      <Button variant="outline" className="border-white/20 text-red-500 bg-white/90 hover:bg-white hover:text-red-600">
                         <Minus className="h-4 w-4 mr-2" />
                         Retirar Fondos
                       </Button>
