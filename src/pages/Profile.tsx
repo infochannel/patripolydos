@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, User, Lock, Globe, DollarSign, Crown, Gift } from "lucide-react";
+import { ArrowLeft, User, Lock, Globe, DollarSign, Crown, Gift, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface ProfileData {
@@ -79,6 +79,7 @@ export function Profile({ onBack }: ProfileProps) {
 
   const { toast } = useToast();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Load profile data from localStorage
@@ -169,6 +170,31 @@ export function Profile({ onBack }: ProfileProps) {
     navigate('/programa-promotor');
   };
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024) { // 1MB limit
+        toast({
+          title: "Error",
+          description: "La imagen debe ser menor a 1MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setProfileData({ ...profileData, profilePicture: result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const userInitials = profileData.name.split(' ').map(n => n[0]).join('').toUpperCase();
 
   return (
@@ -200,19 +226,31 @@ export function Profile({ onBack }: ProfileProps) {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center gap-6">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={profileData.profilePicture} />
-                <AvatarFallback className="bg-gradient-primary text-white font-semibold text-xl">
-                  {userInitials}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-20 w-20 cursor-pointer hover:opacity-80 transition-opacity" onClick={handleImageClick}>
+                  <AvatarImage src={profileData.profilePicture} />
+                  <AvatarFallback className="bg-gradient-primary text-white font-semibold text-xl">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer" onClick={handleImageClick}>
+                  <Camera className="h-6 w-6 text-white" />
+                </div>
+              </div>
               <div className="space-y-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleImageClick}>
                   Cambiar foto
                 </Button>
                 <p className="text-sm text-muted-foreground">
                   JPG, GIF o PNG. Máximo 1MB.
                 </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
               </div>
             </div>
             
