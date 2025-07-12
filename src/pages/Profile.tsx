@@ -362,8 +362,19 @@ export function Profile({ onBack }: ProfileProps) {
               
               {profileData.plan === 'Free' && (
                 <div className="space-y-3">
+                  <div className="p-3 bg-muted rounded-lg space-y-2">
+                    <p className="text-sm font-medium text-foreground">
+                      Plan Free activado con Promo Code
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Tu plan gratuito finaliza el <span className="font-medium">15 Abril 2025</span> (3 meses desde el registro)
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Después necesitarás el Plan Premium: <span className="font-medium">€4/mes</span>
+                    </p>
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    Actualiza a Premium para obtener:
+                    Con Premium obtendrás:
                   </p>
                   <ul className="text-sm space-y-1 text-muted-foreground">
                     <li>• Análisis avanzados</li>
