@@ -85,11 +85,19 @@ export function Dashboard() {
   };
 
   const [wealthData, setWealthData] = useState(getWealthData());
+  const [profilePicture, setProfilePicture] = useState('');
 
   useEffect(() => {
     const userData = localStorage.getItem('patripoly_user');
     if (userData) {
       setUser(JSON.parse(userData));
+    }
+    
+    // Load profile picture from profile settings
+    const profileSettings = localStorage.getItem('patripoly_profile_settings');
+    if (profileSettings) {
+      const settings = JSON.parse(profileSettings);
+      setProfilePicture(settings.profilePicture || '');
     }
     
     // Listen for localStorage changes to update wealth data
@@ -177,7 +185,7 @@ export function Dashboard() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src="" />
+                  <AvatarImage src={profilePicture} />
                   <AvatarFallback className="bg-gradient-primary text-white font-semibold">
                     {userInitials}
                   </AvatarFallback>
