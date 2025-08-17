@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import patripolyLogo from "@/assets/patripoly-logo.png";
-import axios from "@/lib/axios";
+import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from 'react-router-dom';
 
 interface LoginFormProps {
@@ -25,40 +25,36 @@ export function LoginForm({ onToggleMode }: LoginFormProps) {
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // setIsLoading(true);
+    setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/auth/login', {
-        email: email,
-        password: password,
-        remember:false,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      // Suponiendo que el token viene en response.data.token
-      if (response.data && response.data.accessToken) {
-        localStorage.setItem('patripoly_user', JSON.stringify(response.data.usuario));
-        localStorage.setItem('token', `${response.data.accessToken}`);
-        localStorage.setItem('isAuthenticated', 'true');
-        
-        toast({
-          title:'login_successful',
-          description: 'Redirigiendo al panel de control' ,
-        });
-        // Redirige inmediatamente a la raíz
-        // navigate('/', { replace: true });
-        location.reload();
-      } else {
+
+      if (error) {
         toast({
           title: 'Error de inicio de sesión',
-          description: 'Credenciales inválidas' ,
+          description: error.message,
           variant: 'destructive',
         });
+      } else if (data.user) {
+        toast({
+          title: 'Inicio de sesión exitoso',
+          description: 'Redirigiendo al panel de control',
+        });
+        // Force page reload for clean state
+        window.location.href = '/';
       }
     } catch (error) {
       toast({
-        title:'Error de inicio de sesión',
-        description: error?.response?.data?.message || 'Error al conectar con el servidor',
+        title: 'Error de inicio de sesión',
+        description: 'Error al conectar con el servidor',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
