@@ -1,17 +1,12 @@
 
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
+import { LogoutButton } from '@/components/auth/LogoutButton';
 
 const Header: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { t } = useLanguage();
-  // Cerrar sesión
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    navigate('/login');
-  };
   
   // Set the header title based on the current route
   const getHeaderTitle = () => {
@@ -41,7 +36,7 @@ const Header: React.FC = () => {
         />
         <h1 className="text-xl font-bold text-primary">{getHeaderTitle()}</h1>
       </div>
-      {/* Botón de logout movido a MainLayout para mejor orden visual */}
+      <LogoutButton />
     </div>
   );
 };
