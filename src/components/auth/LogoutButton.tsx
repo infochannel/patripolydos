@@ -16,25 +16,44 @@ export function LogoutButton({
 }: LogoutButtonProps) {
   const { toast } = useToast();
 
+  // Clean up auth state utility
+  const cleanupAuthState = () => {
+    // Remove standard auth tokens
+    localStorage.removeItem('supabase.auth.token');
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  };
+
   const handleLogout = async () => {
     try {
-      // Clear any existing auth state
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      // Clean up auth state first
+      cleanupAuthState();
       
-      if (error) {
-        toast({
-          title: "Error al cerrar sesión",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Sesión cerrada",
-          description: "Has cerrado sesión exitosamente",
-        });
-        // Force page reload for clean state
-        window.location.href = '/';
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log('Sign out error (continuing):', err);
       }
+      
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión exitosamente",
+      });
+      
+      // Force page reload for clean state
+      window.location.href = '/';
     } catch (error) {
       toast({
         title: "Error al cerrar sesión",
