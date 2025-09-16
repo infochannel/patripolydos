@@ -75,6 +75,16 @@ export function Dashboard() {
       }
       return 1850; // Default value
     };
+
+    // Get total savings from Ahorros Fondo
+    const getTotalSavings = () => {
+      const savedSavings = localStorage.getItem('ahorros-fondo');
+      if (savedSavings) {
+        const savings = JSON.parse(savedSavings);
+        return savings.reduce((total: number, saving: any) => total + saving.amount, 0);
+      }
+      return 15000; // Default value
+    };
     
     if (savedAssets) {
       const assets = JSON.parse(savedAssets);
@@ -86,7 +96,7 @@ export function Dashboard() {
         patrimonioTotal,
         cashflow: 850,
         ingresosActivos: getIngresosActivos(),
-        nivelAhorro: 15,
+        nivelAhorro: getTotalSavings(),
         progresoCalidadVida: getCalidadVidaProgress(),
         gastos: getGastos()
       };
@@ -97,7 +107,7 @@ export function Dashboard() {
       patrimonioTotal: 25000,
       cashflow: 850,
       ingresosActivos: getIngresosActivos(),
-      nivelAhorro: 15,
+      nivelAhorro: getTotalSavings(),
       progresoCalidadVida: getCalidadVidaProgress(),
       gastos: getGastos()
     };
