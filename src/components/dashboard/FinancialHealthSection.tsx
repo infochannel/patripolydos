@@ -47,17 +47,17 @@ export function FinancialHealthSection({ wealthData }: FinancialHealthSectionPro
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* Tarjeta 1: Patrimonio */}
         <Card className="bg-card hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center text-lg font-semibold">
-              <Wallet className="w-5 h-5 mr-2 text-primary" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center text-base font-semibold">
+              <Wallet className="w-4 h-4 mr-2 text-primary" />
               Patrimonio
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
+          <CardContent className="pt-0">
+            <div className="text-xl font-bold text-primary">
               {formatCurrency(wealthData.patrimonioTotal)}
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Tu patrimonio neto actual
             </p>
           </CardContent>
@@ -65,66 +65,66 @@ export function FinancialHealthSection({ wealthData }: FinancialHealthSectionPro
 
         {/* Tarjeta 2: Cashflow */}
         <Card className="bg-card hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center text-lg font-semibold">
-              <DollarSign className="w-5 h-5 mr-2 text-primary" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center text-base font-semibold">
+              <DollarSign className="w-4 h-4 mr-2 text-primary" />
               Cashflow
               {getHealthBadge(cashflowHealthy)}
             </CardTitle>
-            <p className="text-sm text-muted-foreground">Tus ingresos pasivos</p>
+            <p className="text-xs text-muted-foreground">Tus ingresos pasivos</p>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="pt-0 space-y-2">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Mínimo:</p>
-              <p className="text-lg font-semibold">{formatCurrency(patrimonioMinimum)}</p>
+              <p className="text-xs font-medium text-muted-foreground">Mínimo:</p>
+              <p className="text-sm font-semibold">{formatCurrency(patrimonioMinimum)}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Real:</p>
-              <p className="text-lg font-semibold text-primary">{formatCurrency(wealthData.cashflow)}</p>
+              <p className="text-xs font-medium text-muted-foreground">Real:</p>
+              <p className="text-sm font-semibold text-primary">{formatCurrency(wealthData.cashflow)}</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Tarjeta 3: Costo de Vida */}
         <Card className="bg-card hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center text-lg font-semibold">
-              <ShoppingCart className="w-5 h-5 mr-2 text-primary" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center text-base font-semibold">
+              <ShoppingCart className="w-4 h-4 mr-2 text-primary" />
               Costo de Vida
               {getHealthBadge(costoVidaHealthy)}
             </CardTitle>
-            <p className="text-sm text-muted-foreground">Tus gastos mensuales</p>
+            <p className="text-xs text-muted-foreground">Tus gastos mensuales</p>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="pt-0 space-y-2">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Máximo:</p>
-              <p className="text-lg font-semibold">{formatCurrency(costoVidaMaximum)}</p>
+              <p className="text-xs font-medium text-muted-foreground">Máximo:</p>
+              <p className="text-sm font-semibold">{formatCurrency(costoVidaMaximum)}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Real:</p>
-              <p className="text-lg font-semibold text-primary">{formatCurrency(wealthData.gastos)}</p>
+              <p className="text-xs font-medium text-muted-foreground">Real:</p>
+              <p className="text-sm font-semibold text-primary">{formatCurrency(wealthData.gastos)}</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Tarjeta 4: Ahorro */}
         <Card className="bg-card hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center text-lg font-semibold">
-              <PiggyBank className="w-5 h-5 mr-2 text-primary" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center text-base font-semibold">
+              <PiggyBank className="w-4 h-4 mr-2 text-primary" />
               Ahorro
               {getHealthBadge(ahorroHealthy)}
             </CardTitle>
-            <p className="text-sm text-muted-foreground">Fondo de emergencias y oportunidades</p>
+            <p className="text-xs text-muted-foreground">Fondo de emergencias y oportunidades</p>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="pt-0 space-y-2">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Mínimo:</p>
-              <p className="text-lg font-semibold">{formatCurrency(ahorroMinimum)}</p>
+              <p className="text-xs font-medium text-muted-foreground">Mínimo:</p>
+              <p className="text-sm font-semibold">{formatCurrency(ahorroMinimum)}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Real:</p>
-              <p className="text-lg font-semibold text-primary">{formatCurrency(wealthData.nivelAhorro)}</p>
+              <p className="text-xs font-medium text-muted-foreground">Real:</p>
+              <p className="text-sm font-semibold text-primary">{formatCurrency(wealthData.nivelAhorro)}</p>
             </div>
           </CardContent>
         </Card>
