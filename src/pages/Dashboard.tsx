@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PatrimonioLevelBar } from "@/components/dashboard/PatrimonioLevelBar";
 import { WealthSummaryCards } from "@/components/dashboard/WealthSummaryCards";
 import { ModuleButtons } from "@/components/dashboard/ModuleButtons";
+import { FinancialHealthSection } from "@/components/dashboard/FinancialHealthSection";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut, Settings, User } from "lucide-react";
 import patripolyLogo from "@/assets/patripoly-logo.png";
@@ -309,6 +310,9 @@ export function Dashboard() {
             wealth={wealthData.patrimonioTotal} 
           />
         </div>
+
+        {/* Financial Health Section */}
+        <FinancialHealthSection wealthData={wealthData} />
 
         {/* Wealth Summary Cards */}
         <div className="space-y-4">
