@@ -25,6 +25,14 @@ export function WealthSummaryCards({ data, onCardClick }: WealthSummaryCardsProp
     }).format(amount);
   };
 
+  // Calculate months covered by emergency fund
+  const getMonthsCovered = () => {
+    const monthlyCost = data.gastos || 1850; // Use gastos or default
+    return data.nivelAhorro / monthlyCost;
+  };
+
+  const monthsCovered = getMonthsCovered();
+
   const cards = [
     {
       id: "patrimonio",
@@ -59,11 +67,11 @@ export function WealthSummaryCards({ data, onCardClick }: WealthSummaryCardsProp
     {
       id: "ahorros",
       title: "Nivel de Ahorro",
-      value: `${data.nivelAhorro}%`,
+      value: `${monthsCovered.toFixed(1)} meses`,
       icon: PiggyBank,
-      trend: data.nivelAhorro > 20 ? "up" : "down",
+      trend: monthsCovered > 3 ? "up" : "down",
       bgGradient: "bg-accent",
-      description: "De tus ingresos",
+      description: "Gastos cubiertos",
       clickable: true
     },
     {
