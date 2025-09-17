@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, TrendingUp, Target, Calendar, DollarSign, Zap, Home, Building, Briefcase, PiggyBank, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,26 +35,61 @@ const categories = [
 
 export function Cashflow({ onBack }: CashflowProps) {
   const { toast } = useToast();
-  const [sources, setSources] = useState<PassiveIncomeSource[]>([
-    {
-      id: "1",
-      name: "Alquiler Apartamento Centro",
-      amount: 800,
-      frequency: "monthly",
-      category: "real-estate",
-      dateAdded: "2024-01-15"
-    },
-    {
-      id: "2",
-      name: "Dividendos ETF S&P 500",
-      amount: 150,
-      frequency: "quarterly",
-      category: "dividends",
-      dateAdded: "2024-02-01"
-    }
-  ]);
+  const [sources, setSources] = useState<PassiveIncomeSource[]>([]);
 
   const [monthlyGoal, setMonthlyGoal] = useState(2000);
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const savedSources = localStorage.getItem('passiveIncomeSources');
+    const savedGoal = localStorage.getItem('monthlyGoal');
+    
+    if (savedSources) {
+      try {
+        setSources(JSON.parse(savedSources));
+      } catch (error) {
+        console.error('Error loading passive income sources:', error);
+      }
+    } else {
+      // Set default data if none exists
+      const defaultSources: PassiveIncomeSource[] = [
+        {
+          id: "1",
+          name: "Alquiler Apartamento Centro",
+          amount: 800,
+          frequency: "monthly" as const,
+          category: "real-estate",
+          dateAdded: "2024-01-15"
+        },
+        {
+          id: "2",
+          name: "Dividendos ETF S&P 500",
+          amount: 150,
+          frequency: "quarterly" as const,
+          category: "dividends",
+          dateAdded: "2024-02-01"
+        }
+      ];
+      setSources(defaultSources);
+      localStorage.setItem('passiveIncomeSources', JSON.stringify(defaultSources));
+    }
+    
+    if (savedGoal) {
+      setMonthlyGoal(parseFloat(savedGoal));
+    }
+  }, []);
+
+  // Save sources to localStorage whenever they change
+  const saveSources = (updatedSources: PassiveIncomeSource[]) => {
+    setSources(updatedSources);
+    localStorage.setItem('passiveIncomeSources', JSON.stringify(updatedSources));
+  };
+
+  // Save goal to localStorage
+  const saveGoal = (goal: number) => {
+    setMonthlyGoal(goal);
+    localStorage.setItem('monthlyGoal', goal.toString());
+  };
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
@@ -100,7 +135,7 @@ export function Cashflow({ onBack }: CashflowProps) {
       dateAdded: new Date().toISOString().split('T')[0]
     };
 
-    setSources([...sources, source]);
+    saveSources([...sources, source]);
     setNewSource({ name: "", amount: "", frequency: "monthly", category: "" });
     setIsAddDialogOpen(false);
     
@@ -120,7 +155,7 @@ export function Cashflow({ onBack }: CashflowProps) {
       return;
     }
 
-    setSources(sources.map(source => 
+    saveSources(sources.map(source => 
       source.id === editingSource.id ? editingSource : source
     ));
     setEditingSource(null);
@@ -133,7 +168,7 @@ export function Cashflow({ onBack }: CashflowProps) {
   };
 
   const handleDeleteSource = (id: string) => {
-    setSources(sources.filter(source => source.id !== id));
+    saveSources(sources.filter(source => source.id !== id));
     toast({
       title: "Fuente eliminada",
       description: "La fuente de ingresos ha sido eliminada"
@@ -151,7 +186,7 @@ export function Cashflow({ onBack }: CashflowProps) {
       return;
     }
 
-    setMonthlyGoal(goal);
+    saveGoal(goal);
     setCustomGoal("");
     setIsGoalDialogOpen(false);
     
