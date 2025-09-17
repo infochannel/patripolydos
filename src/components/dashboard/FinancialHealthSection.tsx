@@ -106,7 +106,7 @@ export function FinancialHealthSection({ wealthData }: FinancialHealthSectionPro
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <PiggyBank className="w-5 h-5 mr-2 text-primary" />
-                <span className="font-semibold">Ahorro</span>
+                <span className="font-semibold">Fondo de Emergencias y Oportunidades</span>
                 {getHealthBadge(ahorroHealthy)}
               </div>
               <div className="text-right">
