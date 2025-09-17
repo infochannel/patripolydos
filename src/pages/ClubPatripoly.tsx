@@ -20,6 +20,7 @@ import {
   Play
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getCurrentWealthLevel } from "@/lib/wealth-levels";
 
 interface ClubPatripolyProps {
   onBack: () => void;
@@ -60,10 +61,12 @@ export function ClubPatripoly({ onBack }: ClubPatripolyProps) {
   const { toast } = useToast();
   const [newPost, setNewPost] = useState("");
   const [newComment, setNewComment] = useState("");
+  const [allMembers, setAllMembers] = useState<Member[]>([]);
 
-  const [members] = useState<Member[]>([
+  // Static members for demo purposes
+  const staticMembers: Member[] = [
     {
-      id: "1",
+      id: "static-1",
       name: "Ana Martínez",
       avatar: "",
       level: "Inversionista",
@@ -71,7 +74,7 @@ export function ClubPatripoly({ onBack }: ClubPatripolyProps) {
       isOnline: true
     },
     {
-      id: "2", 
+      id: "static-2", 
       name: "Carlos Ruiz",
       avatar: "",
       level: "Emprendedor",
@@ -79,7 +82,7 @@ export function ClubPatripoly({ onBack }: ClubPatripolyProps) {
       isOnline: false
     },
     {
-      id: "3",
+      id: "static-3",
       name: "María González",
       avatar: "",
       level: "Millonario",
@@ -87,14 +90,58 @@ export function ClubPatripoly({ onBack }: ClubPatripolyProps) {
       isOnline: true
     },
     {
-      id: "4",
+      id: "static-4",
       name: "David López",
       avatar: "",
       level: "Constructor",
       joinedDate: "2024-02-10",
       isOnline: true
     }
-  ]);
+  ];
+
+  // Load real members who opted in to participate
+  useEffect(() => {
+    const loadMembers = () => {
+      const userData = localStorage.getItem('patripoly_user');
+      const profileSettings = localStorage.getItem('patripoly_profile_settings');
+      const savedAssets = localStorage.getItem('patripoly_assets');
+
+      let realMembers: Member[] = [];
+
+      // Check if current user wants to participate
+      if (userData && profileSettings) {
+        const user = JSON.parse(userData);
+        const settings = JSON.parse(profileSettings);
+
+        if (settings.participateInClub) {
+          // Calculate user's wealth level
+          let patrimonioTotal = 25000; // default
+          if (savedAssets) {
+            const assets = JSON.parse(savedAssets);
+            const totalAssets = assets.filter((a: any) => a.type === 'asset').reduce((sum: number, asset: any) => sum + asset.value, 0);
+            const totalLiabilities = assets.filter((a: any) => a.type === 'liability').reduce((sum: number, asset: any) => sum + asset.value, 0);
+            patrimonioTotal = totalAssets - totalLiabilities;
+          }
+
+          const wealthLevel = getCurrentWealthLevel(patrimonioTotal);
+
+          realMembers.push({
+            id: "current-user",
+            name: user.name || "Usuario",
+            avatar: settings.profilePicture || "",
+            level: wealthLevel.name,
+            joinedDate: new Date().toISOString(),
+            isOnline: true
+          });
+        }
+      }
+
+      // Combine real members with static members
+      setAllMembers([...realMembers, ...staticMembers]);
+    };
+
+    loadMembers();
+  }, []);
 
   const [posts, setPosts] = useState<Post[]>([
     {
@@ -209,6 +256,7 @@ export function ClubPatripoly({ onBack }: ClubPatripolyProps) {
 
   const getLevelColor = (level: string) => {
     const colors: Record<string, string> = {
+      "Nuevo Inversor": "bg-muted",
       "Constructor": "bg-muted",
       "Emprendedor": "bg-primary",
       "Inversionista": "bg-accent",
@@ -412,44 +460,62 @@ export function ClubPatripoly({ onBack }: ClubPatripolyProps) {
 
           {/* Members Tab */}
           <TabsContent value="members" className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              {members.map((member) => (
-                <Card key={member.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={member.avatar} />
-                          <AvatarFallback className="bg-gradient-primary text-white">
-                            {getUserInitials(member.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        {member.isOnline && (
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-primary">{member.name}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge className={getLevelColor(member.level)}>
-                            {member.level}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {member.isOnline ? "En línea" : "Desconectado"}
-                          </span>
+            {allMembers.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">No hay miembros visibles</h3>
+                  <p className="text-muted-foreground">
+                    Los miembros aparecerán aquí cuando opten por participar públicamente en el Club Patripoly desde su perfil.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Miembros del Club ({allMembers.length})</h3>
+                  <Badge variant="secondary">{allMembers.filter(m => m.isOnline).length} en línea</Badge>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {allMembers.map((member) => (
+                    <Card key={member.id}>
+                      <CardContent className="p-6">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={member.avatar} />
+                              <AvatarFallback className="bg-gradient-primary text-white">
+                                {getUserInitials(member.name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            {member.isOnline && (
+                              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-primary">{member.name}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge className={getLevelColor(member.level)}>
+                                {member.level}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">
+                                {member.isOnline ? "En línea" : "Desconectado"}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Miembro desde {new Date(member.joinedDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            Conectar
+                          </Button>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Miembro desde {new Date(member.joinedDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Conectar
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </main>

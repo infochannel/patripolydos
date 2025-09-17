@@ -7,9 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, User, Lock, Globe, DollarSign, Crown, Gift, Camera, TrendingUp } from "lucide-react";
+import { ArrowLeft, User, Lock, Globe, DollarSign, Crown, Gift, Camera, TrendingUp, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentWealthLevel, getWealthProgress, getNextWealthLevel } from "@/lib/wealth-levels";
+import { Switch } from "@/components/ui/switch";
 
 interface ProfileData {
   name: string;
@@ -19,6 +20,7 @@ interface ProfileData {
   comparisonCountry: string;
   plan: 'Free' | 'Premium';
   isPromoterActive: boolean;
+  participateInClub: boolean;
 }
 
 interface ProfileProps {
@@ -70,6 +72,7 @@ export function Profile({ onBack }: ProfileProps) {
     comparisonCountry: 'US',
     plan: 'Free',
     isPromoterActive: false,
+    participateInClub: false,
   });
   
   const [passwordData, setPasswordData] = useState({
@@ -101,6 +104,7 @@ export function Profile({ onBack }: ProfileProps) {
         comparisonCountry: settings.comparisonCountry || 'US',
         plan: settings.plan || 'Free',
         isPromoterActive: settings.isPromoterActive || false,
+        participateInClub: settings.participateInClub || false,
       });
     }
 
@@ -131,6 +135,7 @@ export function Profile({ onBack }: ProfileProps) {
       comparisonCountry: profileData.comparisonCountry,
       plan: profileData.plan,
       isPromoterActive: profileData.isPromoterActive,
+      participateInClub: profileData.participateInClub,
     };
     localStorage.setItem('patripoly_profile_settings', JSON.stringify(settings));
     
@@ -454,6 +459,43 @@ export function Profile({ onBack }: ProfileProps) {
               onClick={() => navigate('/wealth-levels')}
             >
               Ver Todos los Niveles
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Club Patripoly */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Club Patripoly
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <span className="text-lg font-medium">Participar en el Club</span>
+                <p className="text-sm text-muted-foreground">
+                  Permite que otros miembros puedan verte en la sección de miembros del Club Patripoly
+                </p>
+              </div>
+              <Switch
+                checked={profileData.participateInClub}
+                onCheckedChange={(checked) => setProfileData({ ...profileData, participateInClub: checked })}
+              />
+            </div>
+            
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                {profileData.participateInClub 
+                  ? "Tu perfil será visible para otros miembros del Club Patripoly. Podrán ver tu nombre, foto de perfil y nivel de patrimonio."
+                  : "Tu perfil estará oculto en la sección de miembros. Solo tú podrás ver el contenido del club."
+                }
+              </p>
+            </div>
+
+            <Button onClick={handleSaveProfile} className="w-full">
+              Guardar configuración del Club
             </Button>
           </CardContent>
         </Card>
