@@ -33,6 +33,14 @@ export function WealthSummaryCards({ data, onCardClick }: WealthSummaryCardsProp
 
   const monthsCovered = getMonthsCovered();
 
+  // Calculate financial freedom percentage
+  const getFinancialFreedomPercentage = () => {
+    if (data.gastos <= 0) return 0;
+    return Math.round((data.cashflow / data.gastos) * 100);
+  };
+
+  const financialFreedomPercentage = getFinancialFreedomPercentage();
+
   const cards = [
     {
       id: "patrimonio",
@@ -53,6 +61,16 @@ export function WealthSummaryCards({ data, onCardClick }: WealthSummaryCardsProp
       bgGradient: "bg-gradient-success",
       description: "Ingresos pasivos",
       clickable: true
+    },
+    {
+      id: "libertad-financiera",
+      title: "Libertad Financiera",
+      value: `${financialFreedomPercentage}%`,
+      icon: Target,
+      trend: financialFreedomPercentage >= 100 ? "up" : "down",
+      bgGradient: "bg-gradient-wealth",
+      description: "Cashflow vs Gastos",
+      clickable: false
     },
     {
       id: "ingresos-activos",
