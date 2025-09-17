@@ -342,8 +342,8 @@ export function Dashboard() {
             ¡Hola, {user.name.split(' ')[0]}! 👋
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Bienvenido a tu dashboard financiero. Aquí puedes ver tu progreso y acceder a todas las herramientas 
-            para construir tu patrimonio y alcanzar la libertad financiera.
+            Bienvenido a tu dashboard financiero. Aquí puedes ver tu progreso, acceder a todas las herramientas 
+            para construir tu patrimonio y convertirte en millonario.
           </p>
         </div>
 
