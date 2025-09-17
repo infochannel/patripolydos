@@ -7,11 +7,13 @@ import { PatrimonioLevelBar } from "@/components/dashboard/PatrimonioLevelBar";
 import { WealthSummaryCards } from "@/components/dashboard/WealthSummaryCards";
 import { ModuleButtons } from "@/components/dashboard/ModuleButtons";
 import { FinancialHealthSection } from "@/components/dashboard/FinancialHealthSection";
+import { DateFilter } from "@/components/dashboard/DateFilter";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut, Settings, User } from "lucide-react";
 import patripolyLogo from "@/assets/patripoly-logo.png";
 import { getCurrentWealthLevel } from "@/lib/wealth-levels";
 import axios from "@/lib/axios";
+import { format, subMonths } from "date-fns";
 interface User {
   email: string;
   name: string;
@@ -21,11 +23,30 @@ interface User {
 
 export function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState("current");
+  const [customDate, setCustomDate] = useState<Date>(new Date());
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Get target date based on selected period
+  const getTargetDate = () => {
+    if (selectedPeriod === "custom") return customDate;
+    
+    const periodMap: Record<string, Date> = {
+      "current": new Date(),
+      "last-1": subMonths(new Date(), 1),
+      "last-2": subMonths(new Date(), 2),
+      "last-3": subMonths(new Date(), 3),
+      "last-6": subMonths(new Date(), 6),
+    };
+    
+    return periodMap[selectedPeriod] || new Date();
+  };
+
   // Get wealth data from localStorage or use defaults
   const getWealthData = () => {
+    const targetDate = getTargetDate();
+    const targetMonth = format(targetDate, "yyyy-MM");
     const savedAssets = localStorage.getItem('patripoly_assets');
     
     // Get Calidad de Vida progress
@@ -61,15 +82,14 @@ export function Dashboard() {
       return 3200; // Default value
     };
 
-    // Get total monthly expenses
+    // Get total monthly expenses for the selected period
     const getGastos = () => {
       const savedExpenses = localStorage.getItem('gastos-expenses');
       if (savedExpenses) {
         const expenses = JSON.parse(savedExpenses);
-        const currentMonth = new Date().toISOString().slice(0, 7);
         return expenses
           .filter((expense: any) => {
-            return expense.date.startsWith(currentMonth);
+            return expense.date.startsWith(targetMonth);
           })
           .reduce((total: number, expense: any) => total + expense.amount, 0);
       }
@@ -133,6 +153,11 @@ export function Dashboard() {
 
   const [wealthData, setWealthData] = useState(getWealthData());
   const [profilePicture, setProfilePicture] = useState('');
+
+  // Update wealth data when period changes
+  useEffect(() => {
+    setWealthData(getWealthData());
+  }, [selectedPeriod, customDate]);
 
   useEffect(() => {
     const userData = localStorage.getItem('patripoly_user');
@@ -341,6 +366,14 @@ export function Dashboard() {
 
         {/* Financial Health Section */}
         <FinancialHealthSection wealthData={wealthData} />
+
+        {/* Date Filter */}
+        <DateFilter 
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={setSelectedPeriod}
+          customDate={customDate}
+          onCustomDateChange={setCustomDate}
+        />
 
         {/* Wealth Summary Cards */}
         <div className="space-y-4">
