@@ -264,6 +264,8 @@ export function Dashboard() {
       navigate("/gastos");
     } else if (moduleId === "promotor") {
       navigate("/programa-promotor");
+    } else if (moduleId === "club") {
+      navigate("/club-patripoly");
     } else {
       toast({
         title: "Módulo en desarrollo",

@@ -9,7 +9,8 @@ import {
   DollarSign, 
   PiggyBank, 
   ShoppingCart, 
-  Share 
+  Share,
+  Users
 } from "lucide-react";
 
 const modules = [
@@ -84,6 +85,14 @@ const modules = [
     icon: Share,
     variant: "wealth",
     color: "bg-gradient-wealth"
+  },
+  {
+    id: "club",
+    title: "Club Patripoly",
+    description: "Conecta con los demás",
+    icon: Users,
+    variant: "default",
+    color: "bg-gradient-primary"
   }
 ];
 

@@ -16,6 +16,7 @@ import { ProgramaPromotor } from "./pages/ProgramaPromotor";
 import { Profile } from "./pages/Profile";
 import { Paywall } from "./pages/Paywall";
 import { WealthLevels } from "./pages/WealthLevels";
+import { ClubPatripoly } from "./pages/ClubPatripoly";
 import NotFound from "./pages/NotFound";
 import PrivateRoute from "@/components/common/PrivateRoute";
 import { LoginForm } from "./components/auth/LoginForm";
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/paywall" element={<Paywall />} />
           <Route path="/login" element={<LoginForm onToggleMode={() => {}} />} />
           <Route path="/wealth-levels" element={<WealthLevels />} />
+          <Route path="/club-patripoly" element={<ClubPatripoly onBack={() => window.history.back()} />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
