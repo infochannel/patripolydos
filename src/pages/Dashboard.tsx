@@ -305,7 +305,6 @@ export function Dashboard() {
             <div className="flex items-center gap-4">
               <img src={patripolyLogo} alt="Patripoly" className="h-10" />
               <div>
-                <h1 className="text-xl font-bold text-primary">Patripoly</h1>
                 <p className="text-sm text-muted-foreground">Self-made Millionaires Club</p>
               </div>
             </div>
