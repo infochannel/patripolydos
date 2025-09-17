@@ -76,6 +76,24 @@ export function Dashboard() {
       return 1850; // Default value
     };
 
+    // Get passive income cashflow from Cashflow page data
+    const getCashflow = () => {
+      const savedSources = localStorage.getItem('passiveIncomeSources');
+      if (savedSources) {
+        const sources = JSON.parse(savedSources);
+        return sources.reduce((total: number, source: any) => {
+          const getMonthlyAmount = (amount: number, frequency: string) => {
+            switch (frequency) {
+              case "quarterly": return amount / 3;
+              case "yearly": return amount / 12;
+              default: return amount;
+            }
+          };
+          return total + getMonthlyAmount(source.amount, source.frequency);
+        }, 0);
+      }
+      return 850; // Default value
+    };
     // Get total savings from Ahorros Fondo
     const getTotalSavings = () => {
       const savedSavings = localStorage.getItem('ahorros-fondo');
@@ -94,7 +112,7 @@ export function Dashboard() {
       
       return {
         patrimonioTotal,
-        cashflow: 850,
+        cashflow: getCashflow(),
         ingresosActivos: getIngresosActivos(),
         nivelAhorro: getTotalSavings(),
         progresoCalidadVida: getCalidadVidaProgress(),
@@ -105,7 +123,7 @@ export function Dashboard() {
     // Default values
     return {
       patrimonioTotal: 25000,
-      cashflow: 850,
+      cashflow: getCashflow(),
       ingresosActivos: getIngresosActivos(),
       nivelAhorro: getTotalSavings(),
       progresoCalidadVida: getCalidadVidaProgress(),
