@@ -303,8 +303,8 @@ export function Dashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img src={patripolyLogo} alt="Patripoly" className="h-10" />
-              <div>
+              <div className="flex flex-col items-center gap-1">
+                <img src={patripolyLogo} alt="Patripoly" className="h-10" />
                 <p className="text-sm text-muted-foreground">Self-made Millionaires Club</p>
               </div>
             </div>
