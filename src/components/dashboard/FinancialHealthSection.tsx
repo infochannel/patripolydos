@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Wallet, DollarSign, PiggyBank, ShoppingCart } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, DollarSign, PiggyBank, ShoppingCart, Scale } from "lucide-react";
 
 interface FinancialHealthSectionProps {
   wealthData: {
@@ -8,6 +8,7 @@ interface FinancialHealthSectionProps {
     cashflow: number;
     gastos: number;
     nivelAhorro: number;
+    ingresosActivos: number;
   };
 }
 
@@ -40,10 +41,57 @@ export function FinancialHealthSection({ wealthData }: FinancialHealthSectionPro
     </Badge>
   );
 
+  // Cálculo de balance
+  const totalIngresos = wealthData.cashflow + wealthData.ingresosActivos;
+  const balance = totalIngresos - wealthData.gastos;
+  const balancePositive = balance >= 0;
+
   return (
     <div className="space-y-4">
       <h3 className="text-2xl font-bold text-primary">Salud Financiera</h3>
       
+      {/* Balance Ingresos vs Gastos - Tarjeta destacada */}
+      <Card className={`bg-card border-2 ${balancePositive ? 'border-green-500/30' : 'border-red-500/30'} hover:shadow-md transition-shadow`}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center justify-between text-lg font-semibold">
+            <div className="flex items-center">
+              <Scale className="w-5 h-5 mr-2 text-primary" />
+              Balance Mensual
+              {getHealthBadge(balancePositive)}
+            </div>
+            <div className={`text-2xl font-bold ${balancePositive ? 'text-green-600' : 'text-red-600'}`}>
+              {balancePositive ? '+' : ''}{formatCurrency(balance)}
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg">
+              <div className="flex items-center">
+                <DollarSign className="w-4 h-4 mr-2 text-green-600" />
+                <span className="text-sm font-medium">Total Ingresos</span>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-green-600">{formatCurrency(totalIngresos)}</p>
+                <p className="text-xs text-muted-foreground">
+                  Activos: {formatCurrency(wealthData.ingresosActivos)} + Pasivos: {formatCurrency(wealthData.cashflow)}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg">
+              <div className="flex items-center">
+                <ShoppingCart className="w-4 h-4 mr-2 text-red-600" />
+                <span className="text-sm font-medium">Total Gastos</span>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-red-600">{formatCurrency(wealthData.gastos)}</p>
+                <p className="text-xs text-muted-foreground">Gastos del mes</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Fila 1 - Patrimonio y Cashflow */}
         <Card className="bg-card hover:shadow-md transition-shadow">
