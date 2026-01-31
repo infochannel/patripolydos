@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ArrowLeft, Plus, TrendingUp, Target, Calendar, DollarSign, Zap, Home, Building, Briefcase, PiggyBank, Edit, Trash2, Check, History, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from "recharts";
 
 interface IncomeConfirmation {
   id: string;
@@ -43,6 +44,158 @@ const categories = [
   { value: "royalties", label: "Regalías", icon: Zap },
   { value: "other", label: "Otros", icon: DollarSign }
 ];
+
+// Component for Income Comparison Chart
+function IncomeComparisonChart({ 
+  confirmations, 
+  totalMonthlyIncome 
+}: { 
+  confirmations: IncomeConfirmation[]; 
+  totalMonthlyIncome: number;
+}) {
+  const chartData = useMemo(() => {
+    const now = new Date();
+    const months: { month: string; monthKey: string; proyectado: number; real: number }[] = [];
+    
+    // Generate last 12 months
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthName = date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+      
+      // Calculate real income for this month from confirmations
+      const realIncome = confirmations
+        .filter(c => {
+          const confirmDate = new Date(c.confirmedAt);
+          return confirmDate.getMonth() === date.getMonth() && 
+                 confirmDate.getFullYear() === date.getFullYear();
+        })
+        .reduce((sum, c) => sum + c.amount, 0);
+      
+      months.push({
+        month: monthName,
+        monthKey,
+        proyectado: totalMonthlyIncome,
+        real: realIncome
+      });
+    }
+    
+    return months;
+  }, [confirmations, totalMonthlyIncome]);
+
+  const totalProyectado = chartData.reduce((sum, d) => sum + d.proyectado, 0);
+  const totalReal = chartData.reduce((sum, d) => sum + d.real, 0);
+  const diferencia = totalReal - totalProyectado;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5" />
+          Ingresos Proyectados vs Reales
+        </CardTitle>
+        <CardDescription>
+          Comparación de los últimos 12 meses
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center p-3 bg-primary/10 rounded-lg">
+            <p className="text-xs text-muted-foreground">Proyectado</p>
+            <p className="text-lg font-bold text-primary">€{totalProyectado.toFixed(0)}</p>
+          </div>
+          <div className="text-center p-3 bg-teal/10 rounded-lg">
+            <p className="text-xs text-muted-foreground">Real</p>
+            <p className="text-lg font-bold text-teal">€{totalReal.toFixed(0)}</p>
+          </div>
+          <div className={`text-center p-3 rounded-lg ${diferencia >= 0 ? 'bg-teal/10' : 'bg-destructive/10'}`}>
+            <p className="text-xs text-muted-foreground">Diferencia</p>
+            <p className={`text-lg font-bold ${diferencia >= 0 ? 'text-teal' : 'text-destructive'}`}>
+              {diferencia >= 0 ? '+' : ''}€{diferencia.toFixed(0)}
+            </p>
+          </div>
+        </div>
+
+        {/* Line Chart */}
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis 
+                dataKey="month" 
+                tick={{ fontSize: 12 }} 
+                className="text-muted-foreground"
+              />
+              <YAxis 
+                tick={{ fontSize: 12 }} 
+                className="text-muted-foreground"
+                tickFormatter={(value) => `€${value}`}
+              />
+              <Tooltip 
+                formatter={(value: number) => [`€${value.toFixed(0)}`, '']}
+                labelFormatter={(label) => `Mes: ${label}`}
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--background))', 
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="proyectado" 
+                name="Proyectado"
+                stroke="hsl(var(--primary))" 
+                strokeWidth={2}
+                dot={{ fill: 'hsl(var(--primary))' }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="real" 
+                name="Real"
+                stroke="hsl(var(--teal))" 
+                strokeWidth={2}
+                dot={{ fill: 'hsl(var(--teal))' }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Bar Chart for Monthly Comparison */}
+        <div className="h-64">
+          <p className="text-sm font-medium mb-2">Comparación Mensual</p>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis 
+                dataKey="month" 
+                tick={{ fontSize: 10 }} 
+                className="text-muted-foreground"
+              />
+              <YAxis 
+                tick={{ fontSize: 12 }} 
+                className="text-muted-foreground"
+                tickFormatter={(value) => `€${value}`}
+              />
+              <Tooltip 
+                formatter={(value: number) => [`€${value.toFixed(0)}`, '']}
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--background))', 
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+              <Legend />
+              <Bar dataKey="proyectado" name="Proyectado" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="real" name="Real" fill="hsl(var(--teal))" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function Cashflow({ onBack }: CashflowProps) {
   const { toast } = useToast();
@@ -853,28 +1006,10 @@ export function Cashflow({ onBack }: CashflowProps) {
           </TabsContent>
 
           <TabsContent value="trends" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Gráficos y Tendencias
-                </CardTitle>
-                <CardDescription>
-                  Análisis visual de tu evolución de cashflow
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64 flex items-center justify-center border-2 border-dashed border-muted-foreground/20 rounded-lg">
-                  <div className="text-center">
-                    <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">Gráficos disponibles próximamente</p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Aquí verás la evolución de tus ingresos pasivos
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <IncomeComparisonChart 
+              confirmations={confirmations}
+              totalMonthlyIncome={totalMonthlyIncome}
+            />
 
             {/* Monthly Projection */}
             <Card>
