@@ -122,10 +122,17 @@ export function Cashflow({ onBack }: CashflowProps) {
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [isEditConfirmationDialogOpen, setIsEditConfirmationDialogOpen] = useState(false);
   const [confirmingSource, setConfirmingSource] = useState<PassiveIncomeSource | null>(null);
   const [confirmationData, setConfirmationData] = useState({
     amount: "",
     date: new Date().toISOString().split('T')[0],
+    notes: ""
+  });
+  const [editingConfirmation, setEditingConfirmation] = useState<IncomeConfirmation | null>(null);
+  const [editConfirmationData, setEditConfirmationData] = useState({
+    amount: "",
+    date: "",
     notes: ""
   });
   const [editingSource, setEditingSource] = useState<PassiveIncomeSource | null>(null);
@@ -262,6 +269,50 @@ export function Cashflow({ onBack }: CashflowProps) {
     toast({
       title: "Ingreso confirmado",
       description: `€${amount.toFixed(0)} registrado de ${confirmingSource.name}`
+    });
+  };
+
+  const handleEditConfirmation = (confirmation: IncomeConfirmation) => {
+    setEditingConfirmation(confirmation);
+    setEditConfirmationData({
+      amount: confirmation.amount.toString(),
+      date: confirmation.confirmedAt,
+      notes: confirmation.notes || ""
+    });
+    setIsEditConfirmationDialogOpen(true);
+  };
+
+  const handleSaveEditConfirmation = () => {
+    if (!editingConfirmation) return;
+
+    const updatedConfirmations = confirmations.map(c => 
+      c.id === editingConfirmation.id 
+        ? {
+            ...c,
+            amount: parseFloat(editConfirmationData.amount) || c.amount,
+            confirmedAt: editConfirmationData.date,
+            notes: editConfirmationData.notes || undefined
+          }
+        : c
+    );
+
+    saveConfirmations(updatedConfirmations);
+    setEditingConfirmation(null);
+    setIsEditConfirmationDialogOpen(false);
+
+    toast({
+      title: "Confirmación actualizada",
+      description: "Los cambios han sido guardados"
+    });
+  };
+
+  const handleDeleteConfirmation = (confirmationId: string) => {
+    const updatedConfirmations = confirmations.filter(c => c.id !== confirmationId);
+    saveConfirmations(updatedConfirmations);
+
+    toast({
+      title: "Confirmación eliminada",
+      description: "El registro ha sido eliminado"
     });
   };
 
@@ -938,7 +989,7 @@ export function Cashflow({ onBack }: CashflowProps) {
                         key={confirmation.id}
                         className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
                       >
-                        <div>
+                        <div className="flex-1">
                           <p className="font-medium">€{confirmation.amount}</p>
                           <p className="text-xs text-muted-foreground">
                             {new Date(confirmation.confirmedAt).toLocaleDateString()}
@@ -947,12 +998,82 @@ export function Cashflow({ onBack }: CashflowProps) {
                             <p className="text-xs text-muted-foreground mt-1">{confirmation.notes}</p>
                           )}
                         </div>
-                        <CheckCircle2 className="h-5 w-5 text-teal" />
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleEditConfirmation(confirmation)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => handleDeleteConfirmation(confirmation.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))
                   )}
                 </div>
               </ScrollArea>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Confirmation Dialog */}
+        <Dialog open={isEditConfirmationDialogOpen} onOpenChange={setIsEditConfirmationDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5" />
+                Editar Confirmación
+              </DialogTitle>
+              <DialogDescription>
+                Corrige los datos de este ingreso confirmado
+              </DialogDescription>
+            </DialogHeader>
+            {editingConfirmation && (
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <p className="font-medium">{editingConfirmation.sourceName}</p>
+                </div>
+                <div>
+                  <Label htmlFor="edit-confirm-amount">Monto recibido (€)</Label>
+                  <Input
+                    id="edit-confirm-amount"
+                    type="number"
+                    value={editConfirmationData.amount}
+                    onChange={(e) => setEditConfirmationData({...editConfirmationData, amount: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-confirm-date">Fecha del ingreso</Label>
+                  <Input
+                    id="edit-confirm-date"
+                    type="date"
+                    value={editConfirmationData.date}
+                    onChange={(e) => setEditConfirmationData({...editConfirmationData, date: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-confirm-notes">Notas (opcional)</Label>
+                  <Input
+                    id="edit-confirm-notes"
+                    value={editConfirmationData.notes}
+                    onChange={(e) => setEditConfirmationData({...editConfirmationData, notes: e.target.value})}
+                    placeholder="Ej. Pago puntual, incluye extra..."
+                  />
+                </div>
+                <Button onClick={handleSaveEditConfirmation} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Check className="h-4 w-4 mr-2" />
+                  Guardar Cambios
+                </Button>
+              </div>
             )}
           </DialogContent>
         </Dialog>
