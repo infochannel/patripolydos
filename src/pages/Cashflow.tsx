@@ -475,6 +475,70 @@ export function Cashflow({ onBack }: CashflowProps) {
                 })}
               </div>
             )}
+
+            {/* Quick Confirm Income Section */}
+            {sources.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-teal" />
+                    Confirmar Ingresos
+                  </CardTitle>
+                  <CardDescription>
+                    Registra los ingresos que has recibido este mes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {sources.map((source) => {
+                    const categoryInfo = getCategoryInfo(source.category);
+                    const IconComponent = categoryInfo.icon;
+                    const sourceConfirmations = getConfirmationsForSource(source.id);
+                    const lastConfirmation = sourceConfirmations[0];
+                    
+                    return (
+                      <div 
+                        key={source.id} 
+                        className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-primary/10">
+                            <IconComponent className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">{source.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              €{source.amount}/{source.frequency === "monthly" ? "mes" : source.frequency === "quarterly" ? "trim" : "año"}
+                              {lastConfirmation && (
+                                <span className="ml-2">
+                                  · Último: {new Date(lastConfirmation.confirmedAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="gap-1"
+                          onClick={() => {
+                            setConfirmingSource(source);
+                            setConfirmationData({
+                              amount: source.amount.toString(),
+                              date: new Date().toISOString().split('T')[0],
+                              notes: ""
+                            });
+                            setIsConfirmDialogOpen(true);
+                          }}
+                        >
+                          <Check className="h-4 w-4" />
+                          <span className="hidden sm:inline">Confirmar</span>
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="sources" className="space-y-4">
