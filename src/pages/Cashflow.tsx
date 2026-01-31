@@ -904,7 +904,7 @@ export function Cashflow({ onBack }: CashflowProps) {
                     placeholder="Ej. Pago puntual, incluye extra..."
                   />
                 </div>
-                <Button onClick={handleConfirmIncome} className="w-full bg-teal hover:bg-teal/90">
+                <Button onClick={handleConfirmIncome} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
                   <Check className="h-4 w-4 mr-2" />
                   Confirmar Ingreso
                 </Button>
