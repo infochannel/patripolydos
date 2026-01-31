@@ -799,112 +799,6 @@ export function Cashflow({ onBack }: CashflowProps) {
               </DialogContent>
             </Dialog>
 
-            {/* Confirm Income Dialog */}
-            <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-teal" />
-                    Confirmar Ingreso
-                  </DialogTitle>
-                  <DialogDescription>
-                    Registra que has recibido este ingreso
-                  </DialogDescription>
-                </DialogHeader>
-                {confirmingSource && (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-muted/30 rounded-lg">
-                      <p className="font-medium">{confirmingSource.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Monto esperado: €{confirmingSource.amount}
-                      </p>
-                    </div>
-                    <div>
-                      <Label htmlFor="confirm-amount">Monto recibido (€)</Label>
-                      <Input
-                        id="confirm-amount"
-                        type="number"
-                        value={confirmationData.amount}
-                        onChange={(e) => setConfirmationData({...confirmationData, amount: e.target.value})}
-                        placeholder={confirmingSource.amount.toString()}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="confirm-date">Fecha del ingreso</Label>
-                      <Input
-                        id="confirm-date"
-                        type="date"
-                        value={confirmationData.date}
-                        onChange={(e) => setConfirmationData({...confirmationData, date: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="confirm-notes">Notas (opcional)</Label>
-                      <Input
-                        id="confirm-notes"
-                        value={confirmationData.notes}
-                        onChange={(e) => setConfirmationData({...confirmationData, notes: e.target.value})}
-                        placeholder="Ej. Pago puntual, incluye extra..."
-                      />
-                    </div>
-                    <Button onClick={handleConfirmIncome} className="w-full bg-teal hover:bg-teal/90">
-                      <Check className="h-4 w-4 mr-2" />
-                      Confirmar Ingreso
-                    </Button>
-                  </div>
-                )}
-              </DialogContent>
-            </Dialog>
-
-            {/* Income History Dialog */}
-            <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <History className="h-5 w-5" />
-                    Historial de Ingresos
-                  </DialogTitle>
-                  <DialogDescription>
-                    {confirmingSource?.name}
-                  </DialogDescription>
-                </DialogHeader>
-                {confirmingSource && (
-                  <ScrollArea className="max-h-[400px]">
-                    <div className="space-y-3">
-                      {getConfirmationsForSource(confirmingSource.id).length === 0 ? (
-                        <p className="text-center text-muted-foreground py-4">
-                          No hay ingresos confirmados para esta fuente
-                        </p>
-                      ) : (
-                        getConfirmationsForSource(confirmingSource.id).map((confirmation) => (
-                          <div 
-                            key={confirmation.id} 
-                            className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
-                          >
-                            <div>
-                              <p className="font-medium">€{confirmation.amount.toFixed(0)}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {new Date(confirmation.confirmedAt).toLocaleDateString('es-ES', {
-                                  day: 'numeric',
-                                  month: 'long',
-                                  year: 'numeric'
-                                })}
-                              </p>
-                              {confirmation.notes && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  "{confirmation.notes}"
-                                </p>
-                              )}
-                            </div>
-                            <CheckCircle2 className="h-5 w-5 text-teal" />
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-                )}
-              </DialogContent>
-            </Dialog>
           </TabsContent>
 
           <TabsContent value="trends" className="space-y-6">
@@ -961,6 +855,107 @@ export function Cashflow({ onBack }: CashflowProps) {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Confirm Income Dialog - Outside Tabs so it works from any tab */}
+        <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-teal" />
+                Confirmar Ingreso
+              </DialogTitle>
+              <DialogDescription>
+                Registra que has recibido este ingreso
+              </DialogDescription>
+            </DialogHeader>
+            {confirmingSource && (
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <p className="font-medium">{confirmingSource.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Monto esperado: €{confirmingSource.amount}
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="confirm-amount">Monto recibido (€)</Label>
+                  <Input
+                    id="confirm-amount"
+                    type="number"
+                    value={confirmationData.amount}
+                    onChange={(e) => setConfirmationData({...confirmationData, amount: e.target.value})}
+                    placeholder={confirmingSource.amount.toString()}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirm-date">Fecha del ingreso</Label>
+                  <Input
+                    id="confirm-date"
+                    type="date"
+                    value={confirmationData.date}
+                    onChange={(e) => setConfirmationData({...confirmationData, date: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirm-notes">Notas (opcional)</Label>
+                  <Input
+                    id="confirm-notes"
+                    value={confirmationData.notes}
+                    onChange={(e) => setConfirmationData({...confirmationData, notes: e.target.value})}
+                    placeholder="Ej. Pago puntual, incluye extra..."
+                  />
+                </div>
+                <Button onClick={handleConfirmIncome} className="w-full bg-teal hover:bg-teal/90">
+                  <Check className="h-4 w-4 mr-2" />
+                  Confirmar Ingreso
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Income History Dialog - Outside Tabs */}
+        <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="h-5 w-5" />
+                Historial de Ingresos
+              </DialogTitle>
+              <DialogDescription>
+                {confirmingSource?.name}
+              </DialogDescription>
+            </DialogHeader>
+            {confirmingSource && (
+              <ScrollArea className="max-h-[400px]">
+                <div className="space-y-3">
+                  {getConfirmationsForSource(confirmingSource.id).length === 0 ? (
+                    <p className="text-center text-muted-foreground py-4">
+                      No hay ingresos confirmados para esta fuente
+                    </p>
+                  ) : (
+                    getConfirmationsForSource(confirmingSource.id).map((confirmation) => (
+                      <div 
+                        key={confirmation.id}
+                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                      >
+                        <div>
+                          <p className="font-medium">€{confirmation.amount}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(confirmation.confirmedAt).toLocaleDateString()}
+                          </p>
+                          {confirmation.notes && (
+                            <p className="text-xs text-muted-foreground mt-1">{confirmation.notes}</p>
+                          )}
+                        </div>
+                        <CheckCircle2 className="h-5 w-5 text-teal" />
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
