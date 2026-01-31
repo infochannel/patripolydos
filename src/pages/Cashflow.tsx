@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, DollarSign, Zap, Home, Building, Briefcase, PiggyBank, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, DollarSign, Zap, Home, Building, Briefcase, PiggyBank, Edit, Trash2, Check, History, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,16 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface IncomeConfirmation {
+  id: string;
+  sourceId: string;
+  sourceName: string;
+  amount: number;
+  confirmedAt: string;
+  notes?: string;
+}
 
 interface PassiveIncomeSource {
   id: string;
@@ -18,6 +28,7 @@ interface PassiveIncomeSource {
   frequency: "monthly" | "quarterly" | "yearly";
   category: string;
   dateAdded: string;
+  lastConfirmedAt?: string;
 }
 
 interface CashflowProps {
@@ -36,6 +47,7 @@ const categories = [
 export function Cashflow({ onBack }: CashflowProps) {
   const { toast } = useToast();
   const [sources, setSources] = useState<PassiveIncomeSource[]>([]);
+  const [confirmations, setConfirmations] = useState<IncomeConfirmation[]>([]);
 
   const [monthlyGoal, setMonthlyGoal] = useState(2000);
 
@@ -43,6 +55,7 @@ export function Cashflow({ onBack }: CashflowProps) {
   useEffect(() => {
     const savedSources = localStorage.getItem('passiveIncomeSources');
     const savedGoal = localStorage.getItem('monthlyGoal');
+    const savedConfirmations = localStorage.getItem('incomeConfirmations');
     
     if (savedSources) {
       try {
@@ -77,12 +90,26 @@ export function Cashflow({ onBack }: CashflowProps) {
     if (savedGoal) {
       setMonthlyGoal(parseFloat(savedGoal));
     }
+
+    if (savedConfirmations) {
+      try {
+        setConfirmations(JSON.parse(savedConfirmations));
+      } catch (error) {
+        console.error('Error loading income confirmations:', error);
+      }
+    }
   }, []);
 
   // Save sources to localStorage whenever they change
   const saveSources = (updatedSources: PassiveIncomeSource[]) => {
     setSources(updatedSources);
     localStorage.setItem('passiveIncomeSources', JSON.stringify(updatedSources));
+  };
+
+  // Save confirmations to localStorage
+  const saveConfirmations = (updatedConfirmations: IncomeConfirmation[]) => {
+    setConfirmations(updatedConfirmations);
+    localStorage.setItem('incomeConfirmations', JSON.stringify(updatedConfirmations));
   };
 
   // Save goal to localStorage
@@ -93,6 +120,14 @@ export function Cashflow({ onBack }: CashflowProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [confirmingSource, setConfirmingSource] = useState<PassiveIncomeSource | null>(null);
+  const [confirmationData, setConfirmationData] = useState({
+    amount: "",
+    date: new Date().toISOString().split('T')[0],
+    notes: ""
+  });
   const [editingSource, setEditingSource] = useState<PassiveIncomeSource | null>(null);
   const [customGoal, setCustomGoal] = useState("");
   const [newSource, setNewSource] = useState({
@@ -196,6 +231,57 @@ export function Cashflow({ onBack }: CashflowProps) {
     });
   };
 
+  const handleConfirmIncome = () => {
+    if (!confirmingSource) return;
+
+    const amount = parseFloat(confirmationData.amount) || confirmingSource.amount;
+    
+    const confirmation: IncomeConfirmation = {
+      id: Date.now().toString(),
+      sourceId: confirmingSource.id,
+      sourceName: confirmingSource.name,
+      amount: amount,
+      confirmedAt: confirmationData.date,
+      notes: confirmationData.notes || undefined
+    };
+
+    saveConfirmations([confirmation, ...confirmations]);
+    
+    // Update the source's lastConfirmedAt
+    const updatedSources = sources.map(source => 
+      source.id === confirmingSource.id 
+        ? { ...source, lastConfirmedAt: confirmationData.date }
+        : source
+    );
+    saveSources(updatedSources);
+
+    setConfirmationData({ amount: "", date: new Date().toISOString().split('T')[0], notes: "" });
+    setConfirmingSource(null);
+    setIsConfirmDialogOpen(false);
+
+    toast({
+      title: "Ingreso confirmado",
+      description: `€${amount.toFixed(0)} registrado de ${confirmingSource.name}`
+    });
+  };
+
+  const getConfirmationsForSource = (sourceId: string) => {
+    return confirmations.filter(c => c.sourceId === sourceId);
+  };
+
+  const getCurrentMonthConfirmations = () => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    return confirmations.filter(c => {
+      const date = new Date(c.confirmedAt);
+      return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    });
+  };
+
+  const totalConfirmedThisMonth = getCurrentMonthConfirmations().reduce((sum, c) => sum + c.amount, 0);
+
   const getCategoryInfo = (categoryValue: string) => {
     return categories.find(cat => cat.value === categoryValue) || categories[5];
   };
@@ -227,7 +313,7 @@ export function Cashflow({ onBack }: CashflowProps) {
 
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Overview Panel */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="bg-gradient-primary border-0 text-white">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -238,6 +324,19 @@ export function Cashflow({ onBack }: CashflowProps) {
             <CardContent>
               <div className="text-3xl font-bold">€{totalMonthlyIncome.toFixed(0)}</div>
               <p className="text-white/80 text-sm">Ingresos pasivos totales</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-teal/30 bg-teal/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-teal" />
+                Confirmados Este Mes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-teal">€{totalConfirmedThisMonth.toFixed(0)}</div>
+              <p className="text-muted-foreground text-sm">{getCurrentMonthConfirmations().length} ingresos confirmados</p>
             </CardContent>
           </Card>
 
@@ -467,49 +566,98 @@ export function Cashflow({ onBack }: CashflowProps) {
                   const categoryInfo = getCategoryInfo(source.category);
                   const IconComponent = categoryInfo.icon;
                   const monthlyAmount = getMonthlyAmount(source.amount, source.frequency);
+                  const sourceConfirmations = getConfirmationsForSource(source.id);
+                  const lastConfirmation = sourceConfirmations[0];
                   
                   return (
                     <Card key={source.id}>
                       <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                              <IconComponent className="h-5 w-5 text-primary" />
+                        <div className="flex flex-col gap-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-primary/10 rounded-lg">
+                                <IconComponent className="h-5 w-5 text-primary" />
+                              </div>
+                              <div>
+                                <h3 className="font-medium">{source.name}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {categoryInfo.label}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="font-medium">{source.name}</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {categoryInfo.label}
-                              </p>
+                            <div className="flex items-center gap-2">
+                              <div className="text-right">
+                                <div className="font-bold text-primary">
+                                  €{monthlyAmount.toFixed(0)}/mes
+                                </div>
+                                <Badge variant="secondary" className="text-xs">
+                                  €{source.amount} {source.frequency === 'monthly' ? 'mensual' : 
+                                    source.frequency === 'quarterly' ? 'trimestral' : 'anual'}
+                                </Badge>
+                              </div>
+                              <div className="flex gap-1">
+                                <Button 
+                                  size="icon" 
+                                  variant="ghost" 
+                                  onClick={() => {
+                                    setEditingSource(source);
+                                    setIsEditDialogOpen(true);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  size="icon" 
+                                  variant="ghost" 
+                                  onClick={() => handleDeleteSource(source.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="text-right">
-                              <div className="font-bold text-primary">
-                                €{monthlyAmount.toFixed(0)}/mes
-                              </div>
-                              <Badge variant="secondary" className="text-xs">
-                                €{source.amount} {source.frequency === 'monthly' ? 'mensual' : 
-                                  source.frequency === 'quarterly' ? 'trimestral' : 'anual'}
-                              </Badge>
+                          
+                          {/* Confirmation Section */}
+                          <div className="flex items-center justify-between pt-3 border-t">
+                            <div className="flex items-center gap-2 text-sm">
+                              {lastConfirmation ? (
+                                <span className="text-muted-foreground">
+                                  Último ingreso: {new Date(lastConfirmation.confirmedAt).toLocaleDateString('es-ES')} - €{lastConfirmation.amount.toFixed(0)}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground italic">Sin ingresos confirmados</span>
+                              )}
                             </div>
-                            <div className="flex gap-1">
-                              <Button 
-                                size="icon" 
-                                variant="ghost" 
+                            <div className="flex gap-2">
+                              {sourceConfirmations.length > 0 && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setConfirmingSource(source);
+                                    setIsHistoryDialogOpen(true);
+                                  }}
+                                >
+                                  <History className="h-4 w-4 mr-1" />
+                                  Historial
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="bg-teal hover:bg-teal/90"
                                 onClick={() => {
-                                  setEditingSource(source);
-                                  setIsEditDialogOpen(true);
+                                  setConfirmingSource(source);
+                                  setConfirmationData({
+                                    amount: source.amount.toString(),
+                                    date: new Date().toISOString().split('T')[0],
+                                    notes: ""
+                                  });
+                                  setIsConfirmDialogOpen(true);
                                 }}
                               >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                size="icon" 
-                                variant="ghost" 
-                                onClick={() => handleDeleteSource(source.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
+                                <Check className="h-4 w-4 mr-1" />
+                                Confirmar Ingreso
                               </Button>
                             </div>
                           </div>
@@ -583,6 +731,113 @@ export function Cashflow({ onBack }: CashflowProps) {
                       Guardar Cambios
                     </Button>
                   </div>
+                )}
+              </DialogContent>
+            </Dialog>
+
+            {/* Confirm Income Dialog */}
+            <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-teal" />
+                    Confirmar Ingreso
+                  </DialogTitle>
+                  <DialogDescription>
+                    Registra que has recibido este ingreso
+                  </DialogDescription>
+                </DialogHeader>
+                {confirmingSource && (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-muted/30 rounded-lg">
+                      <p className="font-medium">{confirmingSource.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Monto esperado: €{confirmingSource.amount}
+                      </p>
+                    </div>
+                    <div>
+                      <Label htmlFor="confirm-amount">Monto recibido (€)</Label>
+                      <Input
+                        id="confirm-amount"
+                        type="number"
+                        value={confirmationData.amount}
+                        onChange={(e) => setConfirmationData({...confirmationData, amount: e.target.value})}
+                        placeholder={confirmingSource.amount.toString()}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirm-date">Fecha del ingreso</Label>
+                      <Input
+                        id="confirm-date"
+                        type="date"
+                        value={confirmationData.date}
+                        onChange={(e) => setConfirmationData({...confirmationData, date: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirm-notes">Notas (opcional)</Label>
+                      <Input
+                        id="confirm-notes"
+                        value={confirmationData.notes}
+                        onChange={(e) => setConfirmationData({...confirmationData, notes: e.target.value})}
+                        placeholder="Ej. Pago puntual, incluye extra..."
+                      />
+                    </div>
+                    <Button onClick={handleConfirmIncome} className="w-full bg-teal hover:bg-teal/90">
+                      <Check className="h-4 w-4 mr-2" />
+                      Confirmar Ingreso
+                    </Button>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+
+            {/* Income History Dialog */}
+            <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5" />
+                    Historial de Ingresos
+                  </DialogTitle>
+                  <DialogDescription>
+                    {confirmingSource?.name}
+                  </DialogDescription>
+                </DialogHeader>
+                {confirmingSource && (
+                  <ScrollArea className="max-h-[400px]">
+                    <div className="space-y-3">
+                      {getConfirmationsForSource(confirmingSource.id).length === 0 ? (
+                        <p className="text-center text-muted-foreground py-4">
+                          No hay ingresos confirmados para esta fuente
+                        </p>
+                      ) : (
+                        getConfirmationsForSource(confirmingSource.id).map((confirmation) => (
+                          <div 
+                            key={confirmation.id} 
+                            className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                          >
+                            <div>
+                              <p className="font-medium">€{confirmation.amount.toFixed(0)}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(confirmation.confirmedAt).toLocaleDateString('es-ES', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric'
+                                })}
+                              </p>
+                              {confirmation.notes && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  "{confirmation.notes}"
+                                </p>
+                              )}
+                            </div>
+                            <CheckCircle2 className="h-5 w-5 text-teal" />
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
                 )}
               </DialogContent>
             </Dialog>
