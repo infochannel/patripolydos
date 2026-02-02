@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { 
-  Sprout, Leaf, TreeDeciduous, Mountain, Rocket, 
-  Gem, Crown, Trophy, Star, Sparkles, Zap 
+  Sprout, Leaf, TreeDeciduous, Trees, Mountain, 
+  Crown, Globe, Sparkles, Zap, LucideIcon
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -13,37 +13,58 @@ interface FlipLevelCardProps {
   showAnimation?: boolean;
 }
 
-const levelData = [
-  { level: 1, name: "Semilla", icon: Sprout, color: "from-green-400 to-green-600", bgColor: "bg-green-500/10" },
-  { level: 2, name: "Brote", icon: Leaf, color: "from-green-500 to-emerald-600", bgColor: "bg-emerald-500/10" },
-  { level: 3, name: "Planta", icon: TreeDeciduous, color: "from-emerald-500 to-teal-600", bgColor: "bg-teal-500/10" },
-  { level: 4, name: "Árbol", icon: TreeDeciduous, color: "from-teal-500 to-cyan-600", bgColor: "bg-cyan-500/10" },
-  { level: 5, name: "Bosque", icon: Mountain, color: "from-cyan-500 to-blue-600", bgColor: "bg-blue-500/10" },
-  { level: 6, name: "Montaña", icon: Mountain, color: "from-blue-500 to-indigo-600", bgColor: "bg-indigo-500/10" },
-  { level: 7, name: "Cohete", icon: Rocket, color: "from-indigo-500 to-purple-600", bgColor: "bg-purple-500/10" },
-  { level: 8, name: "Estrella", icon: Star, color: "from-purple-500 to-pink-600", bgColor: "bg-pink-500/10" },
-  { level: 9, name: "Diamante", icon: Gem, color: "from-pink-500 to-rose-600", bgColor: "bg-rose-500/10" },
-  { level: 10, name: "Corona", icon: Crown, color: "from-amber-400 to-orange-600", bgColor: "bg-orange-500/10" },
-  { level: 11, name: "Leyenda", icon: Trophy, color: "from-yellow-400 to-amber-600", bgColor: "bg-amber-500/10" },
+interface LevelData {
+  level: number;
+  name: string;
+  stage: string;
+  icon: LucideIcon;
+  color: string;
+  bgColor: string;
+}
+
+// 🌱 ETAPA 1 · INICIO (Niveles 1–4)
+// 🌿 ETAPA 2 · CRECIMIENTO (Niveles 5–8)
+// 🌳 ETAPA 3 · CONSOLIDACIÓN (Niveles 9–12)
+// 🍃 ETAPA 4 · EXPANSIÓN (Niveles 13–16)
+// 🌍 ETAPA 5 · MAESTRÍA (Niveles 17–20)
+
+const levelData: LevelData[] = [
+  // ETAPA 1 · INICIO
+  { level: 1, name: "Semilla", stage: "Inicio", icon: Sprout, color: "from-lime-400 to-lime-600", bgColor: "bg-lime-500/10" },
+  { level: 2, name: "Germinación", stage: "Inicio", icon: Sprout, color: "from-lime-500 to-green-500", bgColor: "bg-lime-500/10" },
+  { level: 3, name: "Brote", stage: "Inicio", icon: Leaf, color: "from-green-400 to-green-600", bgColor: "bg-green-500/10" },
+  { level: 4, name: "Plántula", stage: "Inicio", icon: Leaf, color: "from-green-500 to-emerald-500", bgColor: "bg-green-500/10" },
+  // ETAPA 2 · CRECIMIENTO
+  { level: 5, name: "Planta joven", stage: "Crecimiento", icon: TreeDeciduous, color: "from-emerald-400 to-emerald-600", bgColor: "bg-emerald-500/10" },
+  { level: 6, name: "Planta", stage: "Crecimiento", icon: TreeDeciduous, color: "from-emerald-500 to-teal-500", bgColor: "bg-emerald-500/10" },
+  { level: 7, name: "Planta fuerte", stage: "Crecimiento", icon: TreeDeciduous, color: "from-teal-400 to-teal-600", bgColor: "bg-teal-500/10" },
+  { level: 8, name: "Arbusto", stage: "Crecimiento", icon: TreeDeciduous, color: "from-teal-500 to-cyan-500", bgColor: "bg-teal-500/10" },
+  // ETAPA 3 · CONSOLIDACIÓN
+  { level: 9, name: "Árbol joven", stage: "Consolidación", icon: TreeDeciduous, color: "from-cyan-400 to-cyan-600", bgColor: "bg-cyan-500/10" },
+  { level: 10, name: "Árbol", stage: "Consolidación", icon: TreeDeciduous, color: "from-cyan-500 to-blue-500", bgColor: "bg-cyan-500/10" },
+  { level: 11, name: "Árbol robusto", stage: "Consolidación", icon: TreeDeciduous, color: "from-blue-400 to-blue-600", bgColor: "bg-blue-500/10" },
+  { level: 12, name: "Árbol maduro", stage: "Consolidación", icon: TreeDeciduous, color: "from-blue-500 to-indigo-500", bgColor: "bg-blue-500/10" },
+  // ETAPA 4 · EXPANSIÓN
+  { level: 13, name: "Árbol fructífero", stage: "Expansión", icon: Trees, color: "from-indigo-400 to-indigo-600", bgColor: "bg-indigo-500/10" },
+  { level: 14, name: "Bosque incipiente", stage: "Expansión", icon: Trees, color: "from-indigo-500 to-purple-500", bgColor: "bg-indigo-500/10" },
+  { level: 15, name: "Bosque", stage: "Expansión", icon: Trees, color: "from-purple-400 to-purple-600", bgColor: "bg-purple-500/10" },
+  { level: 16, name: "Bosque próspero", stage: "Expansión", icon: Trees, color: "from-purple-500 to-pink-500", bgColor: "bg-purple-500/10" },
+  // ETAPA 5 · MAESTRÍA
+  { level: 17, name: "Ecosistema", stage: "Maestría", icon: Globe, color: "from-pink-400 to-pink-600", bgColor: "bg-pink-500/10" },
+  { level: 18, name: "Territorio fértil", stage: "Maestría", icon: Mountain, color: "from-amber-400 to-amber-600", bgColor: "bg-amber-500/10" },
+  { level: 19, name: "Dominio", stage: "Maestría", icon: Crown, color: "from-orange-400 to-orange-600", bgColor: "bg-orange-500/10" },
+  { level: 20, name: "Legado", stage: "Maestría", icon: Crown, color: "from-yellow-400 to-amber-500", bgColor: "bg-yellow-500/10" },
 ];
 
-const getFlipLevel = (flip: number) => {
-  if (flip <= 2) return levelData[0];
-  if (flip <= 4) return levelData[1];
-  if (flip <= 6) return levelData[2];
-  if (flip <= 8) return levelData[3];
-  if (flip <= 10) return levelData[4];
-  if (flip <= 12) return levelData[5];
-  if (flip <= 14) return levelData[6];
-  if (flip <= 16) return levelData[7];
-  if (flip <= 18) return levelData[8];
-  if (flip <= 20) return levelData[9];
-  return levelData[10];
+const getFlipLevel = (flip: number): LevelData => {
+  // Cada flip corresponde directamente a un nivel (1-20)
+  const levelIndex = Math.min(Math.max(flip - 1, 0), 19);
+  return levelData[levelIndex];
 };
 
 export function FlipLevelCard({ currentFlip, currentAmount, maxFlips, showAnimation = false }: FlipLevelCardProps) {
   const currentLevel = getFlipLevel(currentFlip);
-  const nextLevel = getFlipLevel(currentFlip + 2);
+  const nextLevel = getFlipLevel(Math.min(currentFlip + 1, 20));
   const Icon = currentLevel.icon;
   
   const formatCurrency = (amount: number) => {
@@ -52,7 +73,9 @@ export function FlipLevelCard({ currentFlip, currentAmount, maxFlips, showAnimat
     return `${amount}€`;
   };
 
-  const levelProgress = ((currentFlip - 1) % 2) / 2 * 100 + 50;
+  // Progreso dentro del nivel actual hacia el siguiente
+  const isMaxLevel = currentFlip >= 20;
+  const levelProgress = isMaxLevel ? 100 : 0;
 
   return (
     <motion.div
@@ -123,7 +146,7 @@ export function FlipLevelCard({ currentFlip, currentAmount, maxFlips, showAnimat
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Nivel {currentLevel.level}
+                  Etapa: {currentLevel.stage}
                 </span>
                 <Zap className="h-3 w-3 text-yellow-500" />
               </div>
@@ -136,7 +159,7 @@ export function FlipLevelCard({ currentFlip, currentAmount, maxFlips, showAnimat
                 animate={showAnimation ? { scale: [1, 1.05, 1] } : {}}
                 transition={{ duration: 0.3 }}
               >
-                {currentLevel.name}
+                Nivel {currentLevel.level}: {currentLevel.name}
               </motion.h3>
               
               <p className="text-sm text-muted-foreground mt-1">
@@ -144,20 +167,28 @@ export function FlipLevelCard({ currentFlip, currentAmount, maxFlips, showAnimat
               </p>
 
               {/* Progress to next level */}
-              <div className="mt-3">
-                <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                  <span>Progreso al siguiente nivel</span>
-                  <span>{nextLevel.name}</span>
+              {!isMaxLevel && (
+                <div className="mt-3">
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                    <span>Siguiente nivel</span>
+                    <span>{nextLevel.name}</span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <motion.div
+                      className={cn("h-full bg-gradient-to-r", currentLevel.color)}
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                    />
+                  </div>
                 </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <motion.div
-                    className={cn("h-full bg-gradient-to-r", currentLevel.color)}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${levelProgress}%` }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                  />
+              )}
+              {isMaxLevel && (
+                <div className="mt-3 text-xs text-amber-500 font-medium flex items-center gap-1">
+                  <Crown className="h-3 w-3" />
+                  ¡Reto completado!
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Current Amount */}
