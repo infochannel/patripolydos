@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { FlipLevelCard } from "@/components/duplicador/FlipLevelCard";
+import { FlipLevelCard, getFlipLevel } from "@/components/duplicador/FlipLevelCard";
 import { FlipProgressMap } from "@/components/duplicador/FlipProgressMap";
 import { AchievementBadges } from "@/components/duplicador/AchievementBadges";
 
@@ -317,7 +317,7 @@ export function Duplicador({ onBack }: DuplicadorProps) {
                   <Sparkles className="h-24 w-24 text-yellow-500 mx-auto mb-4" />
                 </motion.div>
                 <h2 className="text-4xl font-bold text-primary mb-2">¡FLIP COMPLETADO!</h2>
-                <p className="text-xl text-muted-foreground">Nivel {currentFlip} desbloqueado</p>
+                <p className="text-xl text-muted-foreground">Nivel {getFlipLevel(currentFlip).level}: {getFlipLevel(currentFlip).name}</p>
               </motion.div>
             </motion.div>
           )}
