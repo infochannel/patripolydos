@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Target, Trophy, Plus, Calendar, Image, FileText, RotateCcw } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Target, Trophy, Plus, Calendar, Image, FileText, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -10,6 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { FlipLevelCard } from "@/components/duplicador/FlipLevelCard";
+import { FlipProgressMap } from "@/components/duplicador/FlipProgressMap";
+import { AchievementBadges } from "@/components/duplicador/AchievementBadges";
 
 interface ActionLog {
   id: string;
@@ -31,6 +35,7 @@ export function Duplicador({ onBack }: DuplicadorProps) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [newActionDescription, setNewActionDescription] = useState("");
   const [newActionDate, setNewActionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [showLevelUp, setShowLevelUp] = useState(false);
   const { toast } = useToast();
 
   const targetAmount = 1000000; // 1M€
@@ -97,6 +102,10 @@ export function Duplicador({ onBack }: DuplicadorProps) {
       const nextFlip = currentFlip + 1;
       const nextAmount = calculateExpectedAmount(nextFlip);
       
+      // Show level up animation
+      setShowLevelUp(true);
+      setTimeout(() => setShowLevelUp(false), 2000);
+      
       setCurrentFlip(nextFlip);
       setCurrentAmount(nextAmount);
       
@@ -105,6 +114,11 @@ export function Duplicador({ onBack }: DuplicadorProps) {
         toast({
           title: "¡Felicitaciones!",
           description: "¡Has completado el Duplicador Challenge!",
+        });
+      } else {
+        toast({
+          title: `🎮 ¡Flip ${currentFlip} completado!`,
+          description: `Has desbloqueado el Flip ${nextFlip}. ¡Sigue así!`,
         });
       }
     }
@@ -277,34 +291,85 @@ export function Duplicador({ onBack }: DuplicadorProps) {
           </AlertDialog>
         </div>
 
+        {/* Level Up Animation Overlay */}
+        <AnimatePresence>
+          {showLevelUp && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: "spring", duration: 0.6 }}
+                className="text-center"
+              >
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 5, -5, 0]
+                  }}
+                  transition={{ duration: 0.5, repeat: 2 }}
+                >
+                  <Sparkles className="h-24 w-24 text-yellow-500 mx-auto mb-4" />
+                </motion.div>
+                <h2 className="text-4xl font-bold text-primary mb-2">¡FLIP COMPLETADO!</h2>
+                <p className="text-xl text-muted-foreground">Nivel {currentFlip} desbloqueado</p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Current Flip Tracker */}
+          {/* Main Game Area */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Level Card - Game Style */}
+            <FlipLevelCard 
+              currentFlip={currentFlip}
+              currentAmount={currentAmount}
+              maxFlips={maxFlips}
+              showAnimation={showLevelUp}
+            />
+
+            {/* Progress Map */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl">Flip Actual: {currentFlip}</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  Mapa de Progreso
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FlipProgressMap 
+                  currentFlip={currentFlip}
+                  maxFlips={maxFlips}
+                  actionLogs={actionLogs}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Current Flip Actions */}
+            <Card className="border-2 border-primary/20">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <span className="bg-primary text-primary-foreground px-3 py-1 rounded-lg text-sm">
+                    FLIP {currentFlip}
+                  </span>
+                  <span className="text-2xl font-bold">{formatCurrency(currentAmount)}</span>
+                  <span className="text-muted-foreground">→</span>
+                  <span className="text-lg text-muted-foreground">{formatCurrency(calculateExpectedAmount(currentFlip + 1))}</span>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-primary">
-                      {formatCurrency(currentAmount)}
-                    </div>
-                    <p className="text-muted-foreground">
-                      Objetivo: {formatCurrency(calculateExpectedAmount(currentFlip + 1))}
-                    </p>
-                  </div>
-                  
-                  <Progress value={progressPercentage} className="h-3" />
-                  <p className="text-center text-sm text-muted-foreground">
-                    Progreso: {currentFlip}/{maxFlips} flips ({Math.round(progressPercentage)}%)
-                  </p>
-
                   <div className="flex gap-2">
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button className="flex-1">
-                          <Plus className="h-4 w-4 mr-2" />
+                        <Button className="flex-1" size="lg">
+                          <Plus className="h-5 w-5 mr-2" />
                           Registrar Acción
                         </Button>
                       </DialogTrigger>
@@ -339,44 +404,74 @@ export function Duplicador({ onBack }: DuplicadorProps) {
                     </Dialog>
 
                     {currentFlip < maxFlips && (
-                      <Button 
-                        onClick={handleCompleteFlip}
-                        variant="outline"
-                        disabled={actionLogs.filter(log => log.flip === currentFlip).length === 0}
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                       >
-                        Completar Flip
-                      </Button>
+                        <Button 
+                          onClick={handleCompleteFlip}
+                          variant="outline"
+                          size="lg"
+                          disabled={actionLogs.filter(log => log.flip === currentFlip).length === 0}
+                          className="border-2 border-green-500/50 hover:bg-green-500/10 hover:border-green-500"
+                        >
+                          <Trophy className="h-5 w-5 mr-2 text-green-500" />
+                          Completar Flip
+                        </Button>
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {/* Current flip actions */}
+                  <div className="space-y-2">
+                    {actionLogs.filter(log => log.flip === currentFlip).length === 0 ? (
+                      <p className="text-center text-muted-foreground py-4 bg-muted/30 rounded-lg">
+                        Registra al menos una acción para completar este flip
+                      </p>
+                    ) : (
+                      actionLogs.filter(log => log.flip === currentFlip).map((log) => (
+                        <motion.div 
+                          key={log.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg"
+                        >
+                          <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                            <Calendar className="h-4 w-4 text-green-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{log.description}</p>
+                            <p className="text-xs text-muted-foreground">{log.date}</p>
+                          </div>
+                        </motion.div>
+                      ))
                     )}
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Action Log */}
+            {/* Action Log - Collapsed */}
             <Card>
               <CardHeader>
-                <CardTitle>Registro de Acciones</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Historial de Acciones</span>
+                  <Badge variant="secondary">{actionLogs.length} registros</Badge>
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-2 max-h-64 overflow-y-auto">
                   {actionLogs.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">
+                    <p className="text-center text-muted-foreground py-4">
                       No hay acciones registradas aún
                     </p>
                   ) : (
                     actionLogs.slice().reverse().map((log) => (
-                      <Card key={log.id} className="border-l-4 border-l-primary">
-                        <CardContent className="pt-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <Badge variant="secondary">Flip {log.flip}</Badge>
-                            <span className="text-sm text-muted-foreground">{log.date}</span>
-                          </div>
-                          <p className="text-sm mb-2">{log.description}</p>
-                          <p className="text-sm font-semibold text-success">
-                            {formatCurrency(log.amount)}
-                          </p>
-                        </CardContent>
-                      </Card>
+                      <div key={log.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                        <Badge variant="outline" className="shrink-0">Flip {log.flip}</Badge>
+                        <p className="text-sm flex-1 truncate">{log.description}</p>
+                        <span className="text-xs text-muted-foreground shrink-0">{log.date}</span>
+                      </div>
                     ))
                   )}
                 </div>
@@ -384,62 +479,56 @@ export function Duplicador({ onBack }: DuplicadorProps) {
             </Card>
           </div>
 
-          {/* Progress Overview */}
+          {/* Sidebar - Game Stats */}
           <div className="space-y-6">
-            <Card>
+            {/* Achievements */}
+            <AchievementBadges 
+              currentFlip={currentFlip}
+              actionLogs={actionLogs}
+              currentAmount={currentAmount}
+            />
+
+            {/* Stats Card - Game Style */}
+            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
               <CardHeader>
-                <CardTitle>Resumen del Progreso</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-primary" />
+                  Estadísticas
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">
-                      {formatCurrency(currentAmount)}
-                    </div>
-                    <p className="text-sm text-muted-foreground">Cantidad actual</p>
-                  </div>
+                  <motion.div 
+                    className="text-center p-4 bg-background rounded-xl border"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <div className="text-3xl font-bold text-primary">{currentFlip - 1}</div>
+                    <p className="text-xs text-muted-foreground">Flips Completados</p>
+                  </motion.div>
                   
-                  <div className="text-center">
-                    <div className="text-lg font-semibold">
-                      {formatCurrency(targetAmount - currentAmount)}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 bg-background rounded-lg border">
+                      <div className="text-xl font-bold">{actionLogs.length}</div>
+                      <p className="text-[10px] text-muted-foreground">Acciones</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">Restante para el objetivo</p>
+                    <div className="text-center p-3 bg-background rounded-lg border">
+                      <div className="text-xl font-bold">×{currentAmount.toLocaleString()}</div>
+                      <p className="text-[10px] text-muted-foreground">Multiplicador</p>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Próximos Flips:</p>
-                    {Array.from({ length: Math.min(5, maxFlips - currentFlip) }, (_, i) => {
+                    <p className="text-xs font-medium text-muted-foreground">Próximos objetivos:</p>
+                    {Array.from({ length: Math.min(3, maxFlips - currentFlip) }, (_, i) => {
                       const flipNumber = currentFlip + i + 1;
                       const amount = calculateExpectedAmount(flipNumber);
                       return (
-                        <div key={flipNumber} className="flex justify-between text-sm">
-                          <span>Flip {flipNumber}:</span>
+                        <div key={flipNumber} className="flex justify-between text-sm p-2 bg-background/50 rounded-lg">
+                          <span className="text-muted-foreground">Flip {flipNumber}</span>
                           <span className="font-medium">{formatCurrency(amount)}</span>
                         </div>
                       );
                     })}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Estadísticas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Flips completados:</span>
-                    <span className="font-medium">{currentFlip - 1}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Acciones registradas:</span>
-                    <span className="font-medium">{actionLogs.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Multiplicador actual:</span>
-                    <span className="font-medium">×{currentAmount}</span>
                   </div>
                 </div>
               </CardContent>
