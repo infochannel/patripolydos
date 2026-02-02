@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Target, Trophy, Plus, Calendar, Image, FileText } from "lucide-react";
+import { ArrowLeft, Target, Trophy, Plus, Calendar, Image, FileText, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -116,6 +117,10 @@ export function Duplicador({ onBack }: DuplicadorProps) {
     setIsCompleted(false);
     setShowIntro(true);
     localStorage.removeItem('duplicador-progress');
+    toast({
+      title: "Challenge reiniciado",
+      description: "Todos los datos han sido eliminados. ¡Buena suerte en tu nuevo intento!",
+    });
   };
 
   const formatCurrency = (amount: number) => {
@@ -239,12 +244,37 @@ export function Duplicador({ onBack }: DuplicadorProps) {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="outline" size="icon" onClick={onBack}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-3xl font-bold">Duplicador Challenge</h1>
-          <Badge variant="secondary">Flip {currentFlip} de {maxFlips}</Badge>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-3xl font-bold">Duplicador Challenge</h1>
+            <Badge variant="secondary">Flip {currentFlip} de {maxFlips}</Badge>
+          </div>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reiniciar Reto
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Reiniciar el Duplicador Challenge?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta acción eliminará permanentemente todo tu progreso, incluyendo {actionLogs.length} acciones registradas y {currentFlip - 1} flips completados. No podrás recuperar estos datos.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={resetChallenge} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Sí, reiniciar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
