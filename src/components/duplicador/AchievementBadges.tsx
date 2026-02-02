@@ -29,94 +29,94 @@ interface Achievement {
 
 const achievements: Achievement[] = [
   {
-    id: "first_flip",
-    name: "Primer Paso",
-    description: "Completar el primer flip",
+    id: "level_1",
+    name: "Primer paso",
+    description: "Lograste tu primer flip. Ya no estás pensando en empezar: ya empezaste.",
     icon: Flame,
     color: "text-orange-500",
     bgColor: "bg-orange-500/10",
     check: (flip) => flip > 1
   },
   {
-    id: "five_flips",
-    name: "En Racha",
-    description: "Completar 5 flips",
+    id: "level_3",
+    name: "En movimiento",
+    description: "Has completado varios flips. La acción empieza a reemplazar a la duda.",
     icon: Zap,
     color: "text-yellow-500",
     bgColor: "bg-yellow-500/10",
-    check: (flip) => flip > 5
+    check: (flip) => flip > 3
   },
   {
-    id: "ten_flips",
-    name: "Imparable",
-    description: "Completar 10 flips",
+    id: "level_5",
+    name: "En racha",
+    description: "Completaste 5 flips. La constancia empieza a jugar a tu favor.",
     icon: TrendingUp,
     color: "text-green-500",
     bgColor: "bg-green-500/10",
-    check: (flip) => flip > 10
+    check: (flip) => flip > 5
   },
   {
-    id: "halfway",
-    name: "Mitad del Camino",
-    description: "Llegar al flip 11",
+    id: "level_8",
+    name: "Documentador",
+    description: "Has registrado al menos 20 pasos del proceso. Aprender de lo que haces te hace avanzar más rápido.",
+    icon: Calendar,
+    color: "text-cyan-500",
+    bgColor: "bg-cyan-500/10",
+    check: (_, logs) => logs.length >= 20
+  },
+  {
+    id: "level_10",
+    name: "Mitad del camino",
+    description: "Alcanzaste tus primeros 1.000 €. El reto deja de ser teórico: ya es real.",
     icon: Target,
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
-    check: (flip) => flip >= 11
-  },
-  {
-    id: "thousand",
-    name: "Primer Mil",
-    description: "Alcanzar 1.000€",
-    icon: Award,
-    color: "text-purple-500",
-    bgColor: "bg-purple-500/10",
     check: (_, __, amount) => amount >= 1000
   },
   {
-    id: "ten_thousand",
-    name: "Diez Mil",
-    description: "Alcanzar 10.000€",
-    icon: Medal,
-    color: "text-pink-500",
-    bgColor: "bg-pink-500/10",
-    check: (_, __, amount) => amount >= 10000
+    id: "level_13",
+    name: "Imparable",
+    description: "Has acumulado 8.000 €. Tu progreso ya no es casual, es consecuencia.",
+    icon: Award,
+    color: "text-purple-500",
+    bgColor: "bg-purple-500/10",
+    check: (_, __, amount) => amount >= 8000
   },
   {
-    id: "hundred_thousand",
-    name: "Seis Cifras",
-    description: "Alcanzar 100.000€",
+    id: "level_15",
+    name: "A toda potencia",
+    description: "Completaste 15 flips. Estás operando con foco, experiencia y ritmo.",
+    icon: Rocket,
+    color: "text-indigo-500",
+    bgColor: "bg-indigo-500/10",
+    check: (flip) => flip > 15
+  },
+  {
+    id: "level_17",
+    name: "Cambio de liga",
+    description: "Superaste las seis cifras (+100.000 €). Ya no juegas el mismo juego que al inicio.",
     icon: Star,
     color: "text-amber-500",
     bgColor: "bg-amber-500/10",
     check: (_, __, amount) => amount >= 100000
   },
   {
-    id: "millionaire",
+    id: "level_19",
+    name: "A un paso",
+    description: "Alcanzaste el medio millón. La meta está tan cerca que se siente.",
+    icon: Medal,
+    color: "text-pink-500",
+    bgColor: "bg-pink-500/10",
+    check: (_, __, amount) => amount >= 500000
+  },
+  {
+    id: "level_20",
     name: "Millonario",
-    description: "Alcanzar 1.000.000€",
+    description: "Completaste el reto del Duplicador. Lograste lo que muy pocos terminan.",
     icon: Crown,
     color: "text-yellow-400",
     bgColor: "bg-yellow-400/10",
-    check: (_, __, amount) => amount >= 1000000
-  },
-  {
-    id: "documenter",
-    name: "Documentador",
-    description: "Registrar 10+ acciones",
-    icon: Calendar,
-    color: "text-cyan-500",
-    bgColor: "bg-cyan-500/10",
-    check: (_, logs) => logs.length >= 10
-  },
-  {
-    id: "rocket",
-    name: "Al Infinito",
-    description: "Completar 15 flips",
-    icon: Rocket,
-    color: "text-indigo-500",
-    bgColor: "bg-indigo-500/10",
-    check: (flip) => flip > 15
+    check: (flip) => flip > 20
   }
 ];
 
